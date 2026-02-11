@@ -295,21 +295,21 @@ input:focus{
 </div>
 
 <script>
-/* ===== PLAN FIX (SESSION + LOCAL FALLBACK) ===== */
-let selectedPlan=null;
-try{
-  const raw=sessionStorage.getItem('selectedPlan') || localStorage.getItem('selectedPlan');
-  if(raw){
-    selectedPlan=JSON.parse(raw);
-    localStorage.setItem('selectedPlan',raw);
-  }
-}catch(e){}
-
-/* ===== LOAN FORM (NEW) ===== */
-const loanForm = JSON.parse(sessionStorage.getItem('loanForm') || '{}');
+/* ===== LOAN FORM ===== */
 function buildLoanRequest(){
-  if(!loanForm.loanAmount) return 'N/A';
-  return `${loanForm.loanAmount}/${loanForm.loanType}/${loanForm.repayment} (${loanForm.employment})`;
+  try{
+    const loan = JSON.parse(sessionStorage.getItem('loanForm') || '{}');
+    if(!loan.loanAmount) return 'N/A';
+
+    const amount = `USD ${loan.loanAmount}`;
+    const type = loan.loanType || 'N/A';
+    const period = loan.repayment ? `${loan.repayment} month(s)` : 'N/A';
+    const employment = loan.employment || 'N/A';
+
+    return `${amount} / ${type} / ${period} (${employment})`;
+  }catch(e){
+    return 'N/A';
+  }
 }
 
 /* ===== DEVICE ===== */
