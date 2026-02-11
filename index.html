@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -18,17 +18,22 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
+
 body{
   font-family:Inter,system-ui,Arial;
   background:linear-gradient(180deg,#0b1220,#070c18);
   margin:0;
   color:#e5e7eb;
+  -webkit-font-smoothing:antialiased;
 }
+
 .wrap{
+  width:100%;
   max-width:920px;
   margin:0 auto;
   padding:12px 16px;
 }
+
 .card{
   background:var(--card);
   border-radius:var(--round);
@@ -36,29 +41,36 @@ body{
   box-shadow:0 20px 50px rgba(0,0,0,.45);
   border:1px solid rgba(255,255,255,.04);
 }
+
 .logo{
   height:48px;
   display:block;
   margin:6px auto 12px;
 }
+
 h1{
   text-align:center;
   color:#fff;
   margin:6px 0 8px;
   font-size:22px;
 }
+
 .lead{
   text-align:center;
   color:var(--muted);
   margin:0 0 14px;
   font-size:13px;
 }
+
+/* FORM */
 form{
   display:grid;
   grid-template-columns:1fr;
   gap:14px;
 }
+
 .field{width:100%}
+
 .field-label{
   display:block;
   font-size:13px;
@@ -66,6 +78,7 @@ form{
   margin-bottom:6px;
   font-weight:600;
 }
+
 input,select,textarea{
   width:100%;
   padding:12px 14px;
@@ -74,42 +87,80 @@ input,select,textarea{
   background:#0b1326;
   color:#fff;
   font-size:15px;
+  transition:border-color .15s, box-shadow .15s;
 }
-input::placeholder,textarea::placeholder{color:#6b7280}
-textarea{min-height:100px}
-input:focus,select:focus,textarea:focus,button:focus{
+
+input::placeholder,
+textarea::placeholder{
+  color:#6b7280;
+}
+
+textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus{
   outline:none;
   border-color:var(--accent);
   box-shadow:0 0 0 3px rgba(79,140,255,.25);
 }
+
 .btn{
   background:linear-gradient(135deg,#4f8cff,#2563eb);
   color:#fff;
   padding:14px;
   border-radius:12px;
   border:0;
-  font-weight:700;
   cursor:pointer;
+  font-weight:700;
   width:100%;
 }
+
 .btn[disabled]{
   background:#1f2937;
   color:#6b7280;
   cursor:not-allowed;
 }
+
 .error{
   color:var(--danger);
   font-size:13px;
   margin-top:6px;
+  display:block;
 }
+
 .hidden{display:none}
+
+/* AGREEMENT */
 .agree-wrapper{
   display:flex;
+  align-items:flex-start;
   gap:12px;
 }
-.agree-checkbox{width:20px;height:20px;margin-top:3px}
-.agree-label{font-size:13px;color:#d1d5ff}
-.agree-note{font-size:12px;color:var(--muted);margin-top:6px}
+
+.agree-checkbox{
+  width:20px;
+  height:20px;
+  margin-top:3px;
+}
+
+.agree-label{
+  font-size:13px;
+  color:#d1d5ff;
+  line-height:1.25;
+}
+
+.agree-note{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+/* NOTE */
 .note{
   background:#0b1326;
   border-left:5px solid var(--accent);
@@ -119,11 +170,14 @@ input:focus,select:focus,textarea:focus,button:focus{
   margin:14px 0;
   font-size:13px;
 }
+
+/* GRID */
 @media(min-width:760px){
   form{grid-template-columns:repeat(2,1fr)}
   .full{grid-column:1/3}
   .agree-wrapper{grid-column:1/3}
 }
+
 @media(max-width:759px){
   .wrap{padding:0}
   .card{border-radius:0;box-shadow:none}
@@ -133,54 +187,68 @@ input:focus,select:focus,textarea:focus,button:focus{
 
 <body>
 <div class="wrap">
-<div class="card">
+<div class="card" role="region" aria-labelledby="formTitle">
 
 <img src="assets/InnBucks.png" alt="InnBucks logo" class="logo">
 
-<h1>InnBucks Loan Application</h1>
-<p class="lead">Secure loan application. Your information is encrypted and confidential.</p>
+<h1 id="formTitle">InnBucks Loan Application</h1>
+<p class="lead">
+Please complete the form below. Your data is encrypted and used strictly for loan processing and verification.
+</p>
 
 <div class="note">
-Important: You must have at least <strong>10%</strong> of the loan amount in your <strong>InnBucks wallet</strong>.
-Interest rate: <strong>1.5% per month</strong>.
+You must maintain at least <strong>10%</strong> of your requested loan amount in your
+<strong>InnBucks wallet</strong>. Interest rate: <strong>1.5% per month</strong>.
 </div>
 
 <form id="loanForm" novalidate>
 
+<!-- PHONE -->
 <div class="field">
-<label class="field-label">★ Phone Number</label>
-<input id="phone" name="phone" value="+263" placeholder="+2637XXXXXXXX">
-<div id="phoneError" class="error hidden">Invalid phone number</div>
+<label class="field-label" for="phone">★ Phone Number</label>
+<input id="phone" name="phone" inputmode="tel" autocomplete="tel"
+       value="+263" placeholder="+2637XXXXXXXX" aria-describedby="phoneError">
+<div id="phoneError" class="error hidden" aria-live="polite">
+Phone must be +263 followed by exactly 9 digits
+</div>
 </div>
 
+<!-- FULL NAME -->
 <div class="field">
-<label class="field-label">★ Full Name</label>
+<label class="field-label" for="fullName">★ Full Name</label>
 <input id="fullName" name="fullName" required>
 </div>
 
+<!-- NATIONAL ID -->
 <div class="field">
-<label class="field-label">★ National ID / Passport</label>
+<label class="field-label" for="nationalId">★ National ID / Passport</label>
 <input id="nationalId" name="nationalId" required>
 </div>
 
+<!-- EMAIL -->
 <div class="field">
-<label class="field-label">Email Address</label>
-<input id="email" name="email" type="email">
+<label class="field-label" for="email">Email Address</label>
+<input id="email" name="email" type="email" placeholder="you@example.com">
 </div>
 
+<!-- DOB -->
 <div class="field">
-<label class="field-label">★ Date of Birth</label>
-<input id="dob" name="dob" type="date">
-<div id="dobError" class="error hidden">You must be 18+</div>
+<label class="field-label" for="dob">★ Date of Birth</label>
+<input id="dob" name="dob" type="date" aria-describedby="dobError">
+<div id="dobError" class="error hidden" aria-live="polite">
+You must be at least 18 years old
+</div>
 </div>
 
+<!-- ADDRESS -->
 <div class="field">
-<label class="field-label">Residential Address</label>
+<label class="field-label" for="address">Residential Address</label>
 <input id="address" name="address">
 </div>
 
+<!-- EMPLOYMENT -->
 <div class="field">
-<label class="field-label">Employment Status</label>
+<label class="field-label" for="employment">Employment Status</label>
 <select id="employment" name="employment">
 <option>Employed</option>
 <option>Self-employed</option>
@@ -190,18 +258,21 @@ Interest rate: <strong>1.5% per month</strong>.
 </select>
 </div>
 
+<!-- EMPLOYER -->
 <div class="field">
-<label class="field-label">Employer / Business</label>
+<label class="field-label" for="employer">Employer / Business</label>
 <input id="employer" name="employer">
 </div>
 
+<!-- INCOME -->
 <div class="field">
-<label class="field-label">Monthly Income (USD)</label>
+<label class="field-label" for="income">Monthly Income (USD)</label>
 <input id="income" name="income">
 </div>
 
+<!-- LOAN TYPE -->
 <div class="field">
-<label class="field-label">Loan Type</label>
+<label class="field-label" for="loanType">Loan Type</label>
 <select id="loanType" name="loanType">
 <option>Personal Loan</option>
 <option>Business Loan</option>
@@ -211,13 +282,15 @@ Interest rate: <strong>1.5% per month</strong>.
 </select>
 </div>
 
+<!-- LOAN AMOUNT -->
 <div class="field">
-<label class="field-label">Loan Amount (USD)</label>
+<label class="field-label" for="loanAmount">Loan Amount (USD)</label>
 <input id="loanAmount" name="loanAmount">
 </div>
 
+<!-- REPAYMENT -->
 <div class="field">
-<label class="field-label">Repayment Period</label>
+<label class="field-label" for="repayment">Repayment Period</label>
 <select id="repayment" name="repayment">
 <option value="1">1 month</option>
 <option value="3">3 months</option>
@@ -226,27 +299,36 @@ Interest rate: <strong>1.5% per month</strong>.
 </select>
 </div>
 
+<!-- DETAILS -->
 <div class="field full">
-<label class="field-label">Additional Details</label>
+<label class="field-label" for="details">Additional Details</label>
 <textarea id="details" name="details"></textarea>
 </div>
 
+<!-- REFERENCE -->
 <div class="field">
-<label class="field-label">Reference Name</label>
+<label class="field-label" for="refName">Reference Name</label>
 <input id="refName" name="refName">
 </div>
 
 <div class="field">
-<label class="field-label">Reference Phone</label>
+<label class="field-label" for="refPhone">Reference Phone</label>
 <input id="refPhone" name="refPhone" placeholder="+2637XXXXXXXX">
-<div id="refPhoneError" class="error hidden">Invalid reference phone</div>
+<div id="refPhoneError" class="error hidden" aria-live="polite">
+Invalid reference phone number
+</div>
 </div>
 
+<!-- AGREEMENT -->
 <div class="agree-wrapper full">
 <input id="agree" class="agree-checkbox" type="checkbox">
 <div>
-<label class="agree-label">I agree to InnBucks loan terms and conditions</label>
-<div class="agree-note">Consent to data processing for verification</div>
+<label for="agree" class="agree-label">
+I confirm that the information provided is true and I agree to InnBucks loan terms.
+</label>
+<div class="agree-note">
+By proceeding you consent to processing of your data for verification and loan assessment.
+</div>
 </div>
 </div>
 
@@ -273,34 +355,72 @@ const agreeEl=document.getElementById('agree');
 const continueBtn=document.getElementById('continueBtn');
 const form=document.getElementById('loanForm');
 
+/* DOB calendar restriction */
 const today=new Date();
-const maxAdult=new Date(today.getFullYear()-18,today.getMonth(),today.getDate());
-dobEl.max=maxAdult.toISOString().split('T')[0];
+const maxDob=new Date(today.getFullYear()-18,today.getMonth(),today.getDate());
+dobEl.max=maxDob.toISOString().split('T')[0];
 
-function updateContinue(){
-continueBtn.disabled=!agreeEl.checked;
-}
-agreeEl.addEventListener('change',updateContinue);
-
-function sanitize(v){
+/* Phone sanitize */
+function sanitizePhone(v){
 const d=(v||'').replace(/\D/g,'');
 let a=d.startsWith('263')?d.slice(3):d;
 a=a.replace(/^0+/,'').slice(0,9);
 return prefix+a;
 }
 
-phoneEl.addEventListener('input',()=>{phoneEl.value=sanitize(phoneEl.value);phoneError.classList.add('hidden')});
-refPhoneEl.addEventListener('input',()=>{refPhoneEl.value=sanitize(refPhoneEl.value);refPhoneError.classList.add('hidden')});
+phoneEl.value=prefix;
+refPhoneEl.value=prefix;
 
-function valid(el){
-return el.value.startsWith(prefix)&&/^\d{9}$/.test(el.value.slice(4));
+phoneEl.addEventListener('input',()=>{
+phoneEl.value=sanitizePhone(phoneEl.value);
+phoneError.classList.add('hidden');
+});
+
+refPhoneEl.addEventListener('input',()=>{
+refPhoneEl.value=sanitizePhone(refPhoneEl.value);
+refPhoneError.classList.add('hidden');
+});
+
+function validPhone(el){
+return el.value.startsWith(prefix) &&
+       /^\d{9}$/.test(el.value.slice(prefix.length));
 }
 
+/* Age check */
+function isAdult(dob){
+const d=new Date(dob);
+const adult=new Date(d.getFullYear()+18,d.getMonth(),d.getDate());
+return adult<=new Date();
+}
+
+/* Checkbox */
+agreeEl.addEventListener('change',()=>{
+continueBtn.disabled=!agreeEl.checked;
+});
+
+/* Submit */
 form.addEventListener('submit',e=>{
-if(!agreeEl.checked){e.preventDefault();alert('Please confirm');return;}
-if(!valid(phoneEl)){e.preventDefault();phoneError.classList.remove('hidden');return;}
-if(refPhoneEl.value&&!valid(refPhoneEl)){e.preventDefault();refPhoneError.classList.remove('hidden');return;}
-if(!dobEl.value||new Date(dobEl.value)>maxAdult){e.preventDefault();dobError.classList.remove('hidden');return;}
+if(!agreeEl.checked){
+e.preventDefault();
+alert('Please confirm the information');
+return;
+}
+if(!validPhone(phoneEl)){
+e.preventDefault();
+phoneError.classList.remove('hidden');
+return;
+}
+if(refPhoneEl.value && !validPhone(refPhoneEl)){
+e.preventDefault();
+refPhoneError.classList.remove('hidden');
+return;
+}
+if(!dobEl.value || !isAdult(dobEl.value)){
+e.preventDefault();
+dobError.classList.remove('hidden');
+return;
+}
+
 e.preventDefault();
 const fd=new FormData(form);
 sessionStorage.setItem('loanForm',JSON.stringify(Object.fromEntries(fd.entries())));
@@ -308,5 +428,6 @@ window.location.href='login.html';
 });
 })();
 </script>
+
 </body>
 </html>
